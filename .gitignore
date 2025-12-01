@@ -72,7 +72,7 @@ mono_crash.*
 *.unitypackage
 *.unitypackage.meta
 *.app
-
+ios-build
 # Crashlytics generated file
 crashlytics-build.properties
 
