@@ -3,7 +3,7 @@
 
 ---
 
-# Project Information
+## Project Information
 ## Topic
 ### 청각에 어려움이 있는 사람들도 음악을 즐길 수 있다, 수어 학습을 돕는 모바일 리듬 게임
 소개 영상   
