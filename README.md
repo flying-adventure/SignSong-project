@@ -3,7 +3,7 @@
 # Sign Song project (수어로 즐기는 음악)
 ## ✨ Project Information
 ### Topic
-청각에 어려움이 있는 사람들도 문화생활을 즐길 수 있다, 수어 학습을 돕는 리듬 게임
+청각에 어려움이 있는 사람들도 음악을 즐길 수 있다, 수어 학습을 돕는 리듬 게임
 
 소개 영상 : https://youtu.be/ZoLThXx7v3g?si=udzQQvcAcZM-3d3K
 
