@@ -1,0 +1,126 @@
+{
+  "song_id": "family_song",
+  "topN": 30,
+  "keyword": [
+    {
+      "word": "가족",
+      "count": 4
+    },
+    {
+      "word": "엄마",
+      "count": 2
+    },
+    {
+      "word": "아빠",
+      "count": 2
+    },
+    {
+      "word": "행복하다",
+      "count": 2
+    },
+    {
+      "word": "오빠",
+      "count": 2
+    },
+    {
+      "word": "손",
+      "count": 2
+    },
+    {
+      "word": "언니",
+      "count": 2
+    },
+    {
+      "word": "가장",
+      "count": 2
+    },
+    {
+      "word": "아침",
+      "count": 1
+    },
+    {
+      "word": "잠",
+      "count": 1
+    },
+    {
+      "word": "뽀뽀",
+      "count": 1
+    },
+    {
+      "word": "이제",
+      "count": 1
+    },
+    {
+      "word": "정성",
+      "count": 1
+    },
+    {
+      "word": "가득",
+      "count": 1
+    },
+    {
+      "word": "요리",
+      "count": 1
+    },
+    {
+      "word": "맛있다",
+      "count": 1
+    },
+    {
+      "word": "따뜻하다",
+      "count": 1
+    },
+    {
+      "word": "잡고",
+      "count": 1
+    },
+    {
+      "word": "학교",
+      "count": 1
+    },
+    {
+      "word": "재밌다",
+      "count": 1
+    },
+    {
+      "word": "소꿉놀이",
+      "count": 1
+    },
+    {
+      "word": "재미있다",
+      "count": 1
+    },
+    {
+      "word": "달콤하다",
+      "count": 1
+    },
+    {
+      "word": "말",
+      "count": 1
+    },
+    {
+      "word": "예쁘다",
+      "count": 1
+    },
+    {
+      "word": "멜로디",
+      "count": 1
+    },
+    {
+      "word": "하하호호",
+      "count": 1
+    },
+    {
+      "word": "웃음",
+      "count": 1
+    },
+    {
+      "word": "가득하다",
+      "count": 1
+    },
+    {
+      "word": "집",
+      "count": 1
+    }
+  ]
+}

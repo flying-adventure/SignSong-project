@@ -1,0 +1,62 @@
+{
+  "song_id": "boat_song",
+  "topN": 20,
+  "keyword": [
+    {
+      "word": "바다",
+      "count": 3
+    },
+    {
+      "word": "바람",
+      "count": 3
+    },
+    {
+      "word": "푸른",
+      "count": 2
+    },
+    {
+      "word": "물결",
+      "count": 2
+    },
+    {
+      "word": "돛단배",
+      "count": 2
+    },
+    {
+      "word": "무엇",
+      "count": 1
+    },
+    {
+      "word": "날개",
+      "count": 1
+    },
+    {
+      "word": "두둥실",
+      "count": 1
+    },
+    {
+      "word": "타고",
+      "count": 1
+    },
+    {
+      "word": "하나",
+      "count": 1
+    },
+    {
+      "word": "건너",
+      "count": 1
+    },
+    {
+      "word": "여행",
+      "count": 1
+    },
+    {
+      "word": "친구",
+      "count": 1
+    },
+    {
+      "word": "갈매기",
+      "count": 1
+    }
+  ]
+}

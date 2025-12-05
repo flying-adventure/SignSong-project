@@ -1,0 +1,78 @@
+{
+  "song_id": "dreamlovehope_song",
+  "topN": 20,
+  "keyword": [
+    {
+      "word": "꿈",
+      "count": 3
+    },
+    {
+      "word": "내겐",
+      "count": 2
+    },
+    {
+      "word": "사랑",
+      "count": 2
+    },
+    {
+      "word": "희망이",
+      "count": 2
+    },
+    {
+      "word": "맑은",
+      "count": 2
+    },
+    {
+      "word": "예쁘다",
+      "count": 2
+    },
+    {
+      "word": "세상",
+      "count": 2
+    },
+    {
+      "word": "노래",
+      "count": 2
+    },
+    {
+      "word": "거",
+      "count": 2
+    },
+    {
+      "word": "공기",
+      "count": 1
+    },
+    {
+      "word": "꽃",
+      "count": 1
+    },
+    {
+      "word": "곧다",
+      "count": 1
+    },
+    {
+      "word": "나무",
+      "count": 1
+    },
+    {
+      "word": "좋다",
+      "count": 1
+    },
+    {
+      "word": "새",
+      "count": 1
+    },
+    {
+      "word": "신나다",
+      "count": 1
+    },
+    {
+      "word": "곱",
+      "count": 1
+    },
+    {
+      "word": "온",
+      "count": 1
+    }
+  ]
+}
