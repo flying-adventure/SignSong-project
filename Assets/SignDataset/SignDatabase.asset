@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fee2050bc61e442368374b3b08932d31, type: 3}
+  m_Name: SignDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::SignDatabase
+  clips:
+  - {fileID: 11400000, guid: 7d5c8809d1b6e496f90b3e44a1d995c1, type: 2}
