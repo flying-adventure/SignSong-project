@@ -79,14 +79,14 @@ DATA_DIR = "word_data"
 
 files = [f for f in os.listdir(DATA_DIR) if f.endswith(".npy")]
 
-print("\n📂 사용할 데이터 선택:")
+print("\n사용할 데이터 선택:")
 for i, f in enumerate(files):
     print(f"{i}. {f}")
 
 choice = int(input("\n▶ 파일 번호 입력: "))
 filename = os.path.join(DATA_DIR, files[choice])
 
-print(f"\n📌 선택된 파일: {filename}")
+print(f"\n선택된 파일: {filename}")
 
 data = np.load(filename)
 print(f"데이터 개수: {len(data)}, shape: {data.shape}")

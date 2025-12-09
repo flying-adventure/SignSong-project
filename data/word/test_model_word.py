@@ -6,7 +6,7 @@ from PIL import ImageFont, ImageDraw, Image
 import os
 
 # ==========================================
-# ⚙️ 설정
+# 설정
 # ==========================================
 SEQ_LEN = 15
 NUM_POINTS = 47
@@ -32,7 +32,7 @@ vote_history = []
 # ==========================================
 # 모델 로드
 # ==========================================
-print("🔄 모델 로드 중...")
+print("모델 로드 중...")
 
 model = tf.keras.models.load_model(MODEL_PATH)
 embed_model = tf.keras.models.load_model(EMBED_MODEL_PATH)
@@ -40,7 +40,7 @@ centroids = np.load(CENTROID_PATH, allow_pickle=True).item()
 distance_threshold = float(np.load(DIST_THRESHOLD_PATH))
 class_names = np.load(CLASSES_PATH, allow_pickle=True)
 
-print("✅ 모델 / 임베딩 / 센트로이드 / 임계값 / 클래스 로딩 완료!")
+print("모델 / 임베딩 / 센트로이드 / 임계값 / 클래스 로딩 완료!")
 
 
 # ==========================================
@@ -119,7 +119,7 @@ sequence = []
 locked = None
 last_face = None
 
-print("🎥 단어 수어 테스트 시작! (종료: q)")
+print("단어 수어 테스트 시작! (종료: q)")
 
 while cap.isOpened():
     ret, frame = cap.read()

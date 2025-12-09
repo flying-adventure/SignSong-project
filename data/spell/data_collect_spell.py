@@ -4,10 +4,10 @@ import numpy as np
 import os
 
 # ==========================================
-# 설정 (팀원들이 여기만 수정하면 됨)
+# 설정
 # ==========================================
 TARGET_CLASS = "테스트"       # 지금 녹화할 지화 이름 (예: ㄱ, ㄴ, j ...)
-USER_NAME = "hb"     # 팀원 이름 (파일 겹침 방지용)
+USER_NAME = "hb"            # 팀원 이름 (파일 겹침 방지용)
 SAVE_DIR = "my_data"      # 저장할 폴더명
 
 SEQ_LEN = 15              # 시퀀스 길이
@@ -94,9 +94,9 @@ while cap.isOpened():
             # 시퀀스 생성 (슬라이딩 윈도우)
             for i in range(len(data_buffer) - SEQ_LEN + 1):
                 all_sequences.append(data_buffer[i : i+SEQ_LEN])
-            print(f"✅ 동작 저장됨! (현재 누적: {len(all_sequences)}개)")
+            print(f"동작 저장됨! (현재 누적: {len(all_sequences)}개)")
         else:
-            print("⚠️ 동작이 너무 짧아서 버려짐")
+            print("동작이 너무 짧아서 버려짐")
             
         data_buffer = [] # 버퍼 초기화
         is_recording = False
@@ -121,7 +121,7 @@ if len(all_sequences) > 0:
     filename = f"{TARGET_CLASS}_{USER_NAME}.npy"
     save_path = os.path.join(SAVE_DIR, filename)
     np.save(save_path, np.array(all_sequences))
-    print(f"\n🎉 저장 완료: {save_path}")
+    print(f"\n저장 완료: {save_path}")
     print(f"데이터 형태: {np.array(all_sequences).shape}")
 else:
     print("\n수집된 데이터가 없습니다.")

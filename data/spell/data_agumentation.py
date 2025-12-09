@@ -5,7 +5,7 @@ import math
 from scipy.interpolate import interp1d
 
 # ==========================================
-# ⚙️ 설정
+# 설정
 # ==========================================
 INPUT_FOLDER = "./collected_data" 
 OUTPUT_FOLDER = "./final_data"
@@ -34,7 +34,7 @@ if not os.path.exists(OUTPUT_FOLDER):
 class_to_idx = {c: i for i, c in enumerate(CLASS_NAMES)}
 
 # ==========================================
-# 🔧 증강 함수들 (이전과 동일)
+# 증강 함수들 (이전과 동일)
 # ==========================================
 def rotate_landmarks(landmarks, angle_degrees):
     angle_radians = math.radians(angle_degrees)
@@ -73,7 +73,7 @@ def mask_landmarks(landmarks, num_mask=1):
     return masked_reshaped.reshape(seq_len, num_feats)
 
 # ==========================================
-# 🎲 클래스별 일괄 증강 함수
+# 클래스별 일괄 증강 함수
 # ==========================================
 def apply_augmentation_per_class(class_name, X_data):
     n_samples = len(X_data)
@@ -133,13 +133,13 @@ def apply_augmentation_per_class(class_name, X_data):
     return np.array(aug_X_list)
 
 # ==========================================
-# 🚀 메인 실행 로직
+# 메인 실행 로직
 # ==========================================
 # 1. 데이터를 클래스별로 모으기
 class_data_storage = {name: [] for name in CLASS_NAMES}
 
 npy_files = glob.glob(os.path.join(INPUT_FOLDER, "*.npy"))
-print(f"📂 파일 로딩 시작 ({len(npy_files)}개 파일)...")
+print(f"파일 로딩 시작 ({len(npy_files)}개 파일)...")
 
 for f in npy_files:
     filename = os.path.basename(f)
@@ -152,7 +152,7 @@ for f in npy_files:
         data = np.load(f)
         class_data_storage[label_name].extend(data)
 
-print("✅ 모든 파일 로드 완료! 이제 클래스별로 증강합니다.\n")
+print("모든 파일 로드 완료! 이제 클래스별로 증강합니다.\n")
 
 # 2. 클래스별 증강 및 통합
 final_X = []
@@ -165,7 +165,7 @@ for class_name in CLASS_NAMES:
     X_origin = np.array(class_data_storage[class_name])
     
     if len(X_origin) == 0:
-        print(f"⚠️ Class '{class_name}' 데이터가 없습니다. 건너뜁니다.")
+        print(f"Class '{class_name}' 데이터가 없습니다. 건너뜁니다.")
         continue
         
     # 원본 데이터 추가
@@ -188,19 +188,19 @@ y_final = np.array(final_y)
 
 if len(X_final) > 0:
     print("\n" + "="*40)
-    print("📊 최종 데이터셋 통계")
+    print("최종 데이터셋 통계")
     print("="*40)
     print(f"1. 순수 원본 데이터: {total_original}개")
     print(f"2. 증강된 데이터   : {total_augmented}개")
     print(f"3. 최종 합계       : {len(X_final)}개")
     
     multiplier = len(X_final) / total_original
-    print(f"👉 총 배율: 원본의 {multiplier:.1f}배")
+    print(f"총 배율: 원본의 {multiplier:.1f}배")
     
     np.save(os.path.join(OUTPUT_FOLDER, 'X_data_seq.npy'), X_final)
     np.save(os.path.join(OUTPUT_FOLDER, 'y_data_seq.npy'), y_final)
     np.save(os.path.join(OUTPUT_FOLDER, 'classes.npy'), np.array(CLASS_NAMES))
     
-    print(f"\n🎉 저장 완료: {OUTPUT_FOLDER}")
+    print(f"\n저장 완료: {OUTPUT_FOLDER}")
 else:
-    print("\n❌ 데이터가 없습니다.")
+    print("\n데이터가 없습니다.")

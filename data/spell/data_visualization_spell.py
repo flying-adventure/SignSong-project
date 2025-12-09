@@ -36,7 +36,6 @@ def plot_random_sample_wide(data, title):
     plt.gca().invert_yaxis() # y축 반전
     plt.grid(True)
     
-    # === [수정된 부분] 카메라 줌 아웃 ===
     # 범위를 -3 ~ 3으로 넓게 잡습니다.
     limit = 3.0
     plt.xlim(-limit, limit)

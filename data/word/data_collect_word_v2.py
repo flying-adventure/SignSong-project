@@ -165,9 +165,9 @@ while cap.isOpened():
         if len(data_buffer) >= SEQ_LEN:
             for i in range(len(data_buffer) - SEQ_LEN + 1):
                 all_sequences.append(data_buffer[i:i+SEQ_LEN])
-            print(f"✅ 시퀀스 저장됨 (누적: {len(all_sequences)})")
+            print(f"시퀀스 저장됨 (누적: {len(all_sequences)})")
         else:
-            print("⚠️ 동작 너무 짧아서 버려짐")
+            print("동작 너무 짧아서 버려짐")
 
         data_buffer = []
         is_recording = False
@@ -192,6 +192,6 @@ cv2.destroyAllWindows()
 if all_sequences:
     filename = f"{TARGET_CLASS}_{USER_NAME}.npy"
     np.save(os.path.join(SAVE_DIR, filename), np.array(all_sequences))
-    print(f"\n🎉 저장 완료 → {SAVE_DIR}/{filename}")
+    print(f"\n저장 완료 → {SAVE_DIR}/{filename}")
 else:
-    print("\n❌ 수집된 데이터 없음")
+    print("\n수집된 데이터 없음")

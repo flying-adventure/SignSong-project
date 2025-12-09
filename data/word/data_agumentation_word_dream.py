@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 import random
 
 # ==========================================
-# ⚙️ 설정
+# 설정
 # ==========================================
 INPUT_FOLDER = "./collected_data_word"
 OUTPUT_FOLDER = "./final_data_word"
@@ -25,7 +25,7 @@ NUM_POINTS = 47
 FEATURE_DIM = NUM_POINTS * 3
 
 # ==========================================
-# 🎯 단어 클래스
+# 단어 클래스
 # ==========================================
 CLASS_NAMES = [
     "내게", "꿈", "사랑", "희망", "맑다", "공기", "꽃", "곧다", "좋다",
@@ -40,7 +40,7 @@ if not os.path.exists(OUTPUT_FOLDER):
     os.makedirs(OUTPUT_FOLDER)
 
 # ==========================================
-# 🔧 증강 함수들
+# 증강 함수들
 # ==========================================
 def rotate_landmarks(l, angle):
     rad = math.radians(angle)
@@ -98,7 +98,7 @@ def apply_augmentation(label, X):
 
 
 # ==========================================
-# 🚀 파일 로딩: 클래스별 → 사용자별 정리
+# 파일 로딩: 클래스별 → 사용자별 정리
 # ==========================================
 class_user_files = {c: {} for c in CLASS_NAMES}
 
@@ -120,7 +120,7 @@ for f in npy_files:
     class_user_files[label][user_id].append(f)
 
 # ==========================================
-# 📌 클래스별로 사용자 랜덤 선택하여 split 수행
+# 클래스별로 사용자 랜덤 선택하여 split 수행
 # ==========================================
 X_train, y_train = [], []
 X_val, y_val = [], []
@@ -131,7 +131,7 @@ for cls in CLASS_NAMES:
     users = list(class_user_files[cls].keys())
 
     if len(users) < 2:
-        print(f"⚠ '{cls}' 클래스는 사용자 수 부족 → 전체 TRAIN 사용")
+        print(f"'{cls}' 클래스는 사용자 수 부족 → 전체 TRAIN 사용")
         # 원본만 넣음
         for u in users:
             for fp in class_user_files[cls][u]:
@@ -207,7 +207,7 @@ np.save(os.path.join(OUTPUT_FOLDER, "X_test_dream.npy"), X_test)
 np.save(os.path.join(OUTPUT_FOLDER, "y_test_dream.npy"), y_test)
 np.save(os.path.join(OUTPUT_FOLDER, "classes_dream.npy"), np.array(CLASS_NAMES, dtype=object))
 
-print("\n🎉 모든 저장 완료!")
+print("\n모든 저장 완료!")
 print("TRAIN:", X_train.shape)
 print("VAL:", X_val.shape)
 print("TEST:", X_test.shape)

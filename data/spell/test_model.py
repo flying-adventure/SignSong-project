@@ -26,13 +26,13 @@ CLASS_NAMES = [
 # ==========================================
 # 파일 로드
 # ==========================================
-print("🔄 모델 로드 중...")
+print("모델 로드 중...")
 model = tf.keras.models.load_model(MODEL_PATH)
 embed_model = tf.keras.models.load_model(EMBED_MODEL_PATH)
 centroids = np.load(CENTROID_PATH, allow_pickle=True).item()
 distance_threshold = float(np.load(DIST_THRESHOLD_PATH))
 
-print("✅ 모델 / 임베딩 / 센트로이드 / 임계값 로드 완료!")
+print("모델 / 임베딩 / 센트로이드 / 임계값 로드 완료!")
 
 # ==========================================
 # 미디어파이프 설정
@@ -110,7 +110,7 @@ cap = cv2.VideoCapture(0)
 sequence = []
 locked_result = None
 
-print("🎥 웹캠 시작 (종료: q)")
+print("웹캠 시작 (종료: q)")
 
 while cap.isOpened():
     ret, frame = cap.read()
