@@ -39,6 +39,9 @@ public class XBotKSLRig : MonoBehaviour
     [Tooltip("손목이 초기자세에서 최대 몇 도까지 꺾일지")]
     [Range(0f, 180f)] public float maxWristAngle = 60f;
 
+    [Tooltip("팔(UpperArm/LowerArm)이 초기자세에서 최대 몇 도까지 회전할지")]
+    [Range(0f, 180f)] public float maxArmAngle = 120f;   // 새로 추가
+
     [Header("팔/손이 몸 뒤로 가지 않게 하기")]
     [Tooltip("손/팔 목표 위치가 가슴 뒤로 가면 가슴 앞 평면으로 당겨오기")]
     public bool keepHandsInFront = true;
@@ -302,50 +305,48 @@ public class XBotKSLRig : MonoBehaviour
     // ===================== 오른팔 / 오른손 =====================
 
     private void ApplyRightArm()
-    {
-        var body = loader.body3D;
-        if (body.Length <= BODY_R_WRIST)
-            return;
+{
+    var body = loader.body3D;
+    if (body.Length <= BODY_R_WRIST)
+        return;
 
-        Vector3 s = MapToUnity(body[BODY_R_SHOULDER]); // shoulder
-        Vector3 e = MapToUnity(body[BODY_R_ELBOW]);    // elbow
-        Vector3 w = MapToUnity(body[BODY_R_WRIST]);    // wrist
+    Vector3 s = MapToUnity(body[BODY_R_SHOULDER]); // shoulder
+    Vector3 e = MapToUnity(body[BODY_R_ELBOW]);    // elbow
+    Vector3 w = MapToUnity(body[BODY_R_WRIST]);    // wrist
 
-        // 오른팔은 몸의 오른쪽 + 앞쪽 공간에만 있도록 클램프
-        w = ClampToFrontOfChest(w, true);
+    // 👉 팔꿈치/손목 둘 다 "가슴 앞 + 오른쪽" 영역으로 클램프
+    e = ClampToFrontOfChest(e, true);
+    w = ClampToFrontOfChest(w, true);
 
-        Vector3 upperDir = e - s;
-        Vector3 lowerDir = w - e;
+    Vector3 upperDir = e - s;
+    Vector3 lowerDir = w - e;
 
-        if (upperDir.sqrMagnitude < 1e-6f || lowerDir.sqrMagnitude < 1e-6f)
-            return;
+    if (upperDir.sqrMagnitude < 1e-6f || lowerDir.sqrMagnitude < 1e-6f)
+        return;
 
-        upperDir.Normalize();
-        lowerDir.Normalize();
+    upperDir.Normalize();
+    lowerDir.Normalize();
 
-        Quaternion upperWorldRot = Quaternion.LookRotation(upperDir, Vector3.up);
-        Quaternion lowerWorldRot = Quaternion.LookRotation(lowerDir, Vector3.up);
+    Quaternion upperWorldRot = Quaternion.LookRotation(upperDir, Vector3.up);
+    Quaternion lowerWorldRot = Quaternion.LookRotation(lowerDir, Vector3.up);
 
-        Transform upperParent = rightUpperArm.parent;
-        Transform lowerParent = rightLowerArm.parent;
-        if (upperParent == null || lowerParent == null)
-            return;
+    // 초기 로컬 회전 기준 + 각도 제한
+    ApplyBoneWithClamp(
+        rightUpperArm,
+        rightUpperArmInitialLocalRot,
+        upperWorldRot,
+        limbLerp,
+        maxArmAngle
+    );
 
-        Quaternion targetUpperLocal = Quaternion.Inverse(upperParent.rotation) * upperWorldRot;
-        Quaternion targetLowerLocal = Quaternion.Inverse(lowerParent.rotation) * lowerWorldRot;
-
-        rightUpperArm.localRotation = Quaternion.Slerp(
-            rightUpperArm.localRotation,
-            targetUpperLocal,
-            limbLerp
-        );
-
-        rightLowerArm.localRotation = Quaternion.Slerp(
-            rightLowerArm.localRotation,
-            targetLowerLocal,
-            limbLerp
-        );
-    }
+    ApplyBoneWithClamp(
+        rightLowerArm,
+        rightLowerArmInitialLocalRot,
+        lowerWorldRot,
+        limbLerp,
+        maxArmAngle
+    );
+}
 
     private void ApplyRightHand()
     {
@@ -392,53 +393,50 @@ public class XBotKSLRig : MonoBehaviour
     // ===================== 왼팔 / 왼손 =====================
 
     private void ApplyLeftArm()
-    {
-        if (leftUpperArm == null || leftLowerArm == null)
-            return;
+{
+    if (leftUpperArm == null || leftLowerArm == null)
+        return;
 
-        var body = loader.body3D;
-        if (body.Length <= BODY_L_WRIST)
-            return;
+    var body = loader.body3D;
+    if (body.Length <= BODY_L_WRIST)
+        return;
 
-        Vector3 s = MapToUnity(body[BODY_L_SHOULDER]); // shoulder
-        Vector3 e = MapToUnity(body[BODY_L_ELBOW]);    // elbow
-        Vector3 w = MapToUnity(body[BODY_L_WRIST]);    // wrist
+    Vector3 s = MapToUnity(body[BODY_L_SHOULDER]); // shoulder
+    Vector3 e = MapToUnity(body[BODY_L_ELBOW]);    // elbow
+    Vector3 w = MapToUnity(body[BODY_L_WRIST]);    // wrist
 
-        // 왼팔은 몸의 왼쪽 + 앞쪽 공간에만 있도록 클램프
-        w = ClampToFrontOfChest(w, false);
+    // 👉 팔꿈치/손목 둘 다 "가슴 앞 + 왼쪽" 영역으로 클램프
+    e = ClampToFrontOfChest(e, false);
+    w = ClampToFrontOfChest(w, false);
 
-        Vector3 upperDir = e - s;
-        Vector3 lowerDir = w - e;
+    Vector3 upperDir = e - s;
+    Vector3 lowerDir = w - e;
 
-        if (upperDir.sqrMagnitude < 1e-6f || lowerDir.sqrMagnitude < 1e-6f)
-            return;
+    if (upperDir.sqrMagnitude < 1e-6f || lowerDir.sqrMagnitude < 1e-6f)
+        return;
 
-        upperDir.Normalize();
-        lowerDir.Normalize();
+    upperDir.Normalize();
+    lowerDir.Normalize();
 
-        Quaternion upperWorldRot = Quaternion.LookRotation(upperDir, Vector3.up);
-        Quaternion lowerWorldRot = Quaternion.LookRotation(lowerDir, Vector3.up);
+    Quaternion upperWorldRot = Quaternion.LookRotation(upperDir, Vector3.up);
+    Quaternion lowerWorldRot = Quaternion.LookRotation(lowerDir, Vector3.up);
 
-        Transform upperParent = leftUpperArm.parent;
-        Transform lowerParent = leftLowerArm.parent;
-        if (upperParent == null || lowerParent == null)
-            return;
+    ApplyBoneWithClamp(
+        leftUpperArm,
+        leftUpperArmInitialLocalRot,
+        upperWorldRot,
+        limbLerp,
+        maxArmAngle
+    );
 
-        Quaternion targetUpperLocal = Quaternion.Inverse(upperParent.rotation) * upperWorldRot;
-        Quaternion targetLowerLocal = Quaternion.Inverse(lowerParent.rotation) * lowerWorldRot;
-
-        leftUpperArm.localRotation = Quaternion.Slerp(
-            leftUpperArm.localRotation,
-            targetUpperLocal,
-            limbLerp
-        );
-
-        leftLowerArm.localRotation = Quaternion.Slerp(
-            leftLowerArm.localRotation,
-            targetLowerLocal,
-            limbLerp
-        );
-    }
+    ApplyBoneWithClamp(
+        leftLowerArm,
+        leftLowerArmInitialLocalRot,
+        lowerWorldRot,
+        limbLerp,
+        maxArmAngle
+    );
+}
 
     private void ApplyLeftHand()
     {
@@ -552,6 +550,7 @@ public class XBotKSLRig : MonoBehaviour
     /// </summary>
     private Vector3 MapToUnity(Vector3 p)
     {
-        return new Vector3(p.x, -p.y, zSign * p.z);
+        // x도 반전해서 "사람 기준 오른쪽"이 유니티에서도 올바르게 보이도록
+        return new Vector3(-p.x, -p.y, zSign * p.z);
     }
 }
