@@ -29,23 +29,39 @@ public static class ChartParser
                 }
 
                 var parts = line.Split(',');
-                if (parts.Length < 3) continue;
-
-                string word = parts[1]; // keyword
-                string lyricTimeStr = parts[2]; // lyric_time_sec
-
-                if (!float.TryParse(lyricTimeStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float startTime))
+                // lane 포함해서 최소 9개 컬럼 있어야 함
+                if (parts.Length < 3)
                 {
-                    Debug.LogWarning($"[ChartParser] Parse failed: {lyricTimeStr}");
+                    Debug.LogWarning($"[ChartParser] parts length < 3: {line}");
                     continue;
                 }
 
-                // 일단 lane은 가운데(1)로
+                string word = parts[1];           // keyword
+                string lyricTimeStr = parts[2];   // lyric_time_sec
+
+                if (!float.TryParse(lyricTimeStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float startTime))
+                {
+                    Debug.LogWarning($"[ChartParser] Parse failed (lyric_time_sec): {lyricTimeStr}");
+                    continue;
+                }
+
+                //  lane 컬럼 읽기 (없으면 기본 1)
+                int lane = 1; // default middle
+                if (parts.Length >= 9)
+                {
+                    string laneStr = parts[8]; // lane 컬럼
+                    if (!int.TryParse(laneStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out lane))
+                    {
+                        lane = 1;
+                        Debug.LogWarning($"[ChartParser] lane parse failed, use default 1. laneStr={laneStr}");
+                    }
+                }
+
                 result.Add(new NoteData
                 {
                     time = startTime,
                     word = word,
-                    lane = 1
+                    lane = lane
                 });
             }
         }

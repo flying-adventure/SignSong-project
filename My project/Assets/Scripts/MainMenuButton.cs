@@ -5,6 +5,6 @@ public class MainMenuButton : MonoBehaviour
 {
     public void GoToMainMenu()
     {
-        SceneManager.LoadScene("ÁöÈ­_list");
+        SceneManager.LoadScene("Sign_list");
     }
 }

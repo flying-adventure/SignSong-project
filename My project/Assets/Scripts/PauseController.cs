@@ -26,6 +26,6 @@ public class PauseController : MonoBehaviour
     public void OnExit()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("???_list");
+        SceneManager.LoadScene("Sign_list");
     }
 }
