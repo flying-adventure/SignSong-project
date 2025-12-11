@@ -8,13 +8,13 @@ public class PauseController : MonoBehaviour
     public void OnPause()
     {
         pausePanel.SetActive(true);
-        Time.timeScale = 0f; // 게임 정지
+        Time.timeScale = 0f; // ???? ????
     }
 
     public void OnContinue()
     {
         pausePanel.SetActive(false);
-        Time.timeScale = 1f; // 재개
+        Time.timeScale = 1f; // ??
     }
 
     public void OnTryAgain()
@@ -26,6 +26,6 @@ public class PauseController : MonoBehaviour
     public void OnExit()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("지화_list");
+        SceneManager.LoadScene("???_list");
     }
 }

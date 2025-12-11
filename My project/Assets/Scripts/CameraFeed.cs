@@ -21,7 +21,7 @@ public class CameraFeed : MonoBehaviour
 
         if (camTexture == null)
         {
-            Debug.LogError("Àü¸é Ä«¸Ş¶ó¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogError("ì „ë©´ ì¹´ë©”ë¼ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
             return;
         }
 

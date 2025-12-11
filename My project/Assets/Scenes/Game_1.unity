@@ -503,6 +503,7 @@ GameObject:
   - component: {fileID: 612609617}
   - component: {fileID: 612609619}
   - component: {fileID: 612609618}
+  - component: {fileID: 612609620}
   m_Layer: 5
   m_Name: guide_model
   m_TagString: Untagged
@@ -564,6 +565,42 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 612609616}
   m_CullTransparentMesh: 1
+--- !u!328 &612609620
+VideoPlayer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 612609616}
+  m_Enabled: 1
+  m_VideoClip: {fileID: 0}
+  m_TargetCameraAlpha: 1
+  m_TargetCamera3DLayout: 0
+  m_TargetCamera: {fileID: 0}
+  m_TargetTexture: {fileID: 0}
+  m_TimeReference: 0
+  m_TargetMaterialRenderer: {fileID: 0}
+  m_TargetMaterialProperty: <noninit>
+  m_RenderMode: 2
+  m_AspectRatio: 3
+  m_DataSource: 0
+  m_TimeUpdateMode: 2
+  m_PlaybackSpeed: 1
+  m_AudioOutputMode: 2
+  m_TargetAudioSources:
+  - {fileID: 0}
+  m_DirectAudioVolumes:
+  - 1
+  m_Url: 
+  m_EnabledAudioTracks: 01
+  m_DirectAudioMutes: 00
+  m_ControlledAudioTrackCount: 1
+  m_PlayOnAwake: 1
+  m_SkipOnDrop: 1
+  m_Looping: 0
+  m_WaitForFirstFrame: 1
+  m_FrameReadyEventEnabled: 0
+  m_VideoShaders: []
 --- !u!1 &615248221
 GameObject:
   m_ObjectHideFlags: 0
@@ -1045,6 +1082,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   letterText: {fileID: 1794637095}
   countdownText: {fileID: 860106283}
+  displayScreen: {fileID: 0}
+  videoPlayer: {fileID: 0}
+  contentList: []
 --- !u!114 &860106283
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2254,6 +2294,129 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   letterText: {fileID: 1794637095}
   countdownText: {fileID: 860106283}
+  displayScreen: {fileID: 612609618}
+  videoPlayer: {fileID: 612609620}
+  contentList:
+  - letter: "\u3131"
+    imageFile: {fileID: 2800000, guid: d993a416063007c4cb1a4226a638db1f, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3134"
+    imageFile: {fileID: 2800000, guid: 377572c808737ba498f513f6680a0deb, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3137"
+    imageFile: {fileID: 2800000, guid: d6e56f9c008d96940aa90cd0d7946444, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3139"
+    imageFile: {fileID: 2800000, guid: fb1974a8f141fec42a0d060e2581f51d, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3141"
+    imageFile: {fileID: 2800000, guid: 1de4f94f30c79b0488f344ffb3d114ed, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3142"
+    imageFile: {fileID: 2800000, guid: 7aece141151b0cd42b0fa23256c2c6dc, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3145"
+    imageFile: {fileID: 2800000, guid: 279f5316f82510140ad2954955c6c36f, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3147"
+    imageFile: {fileID: 2800000, guid: 87756f3616c04fc45a9902b0da935a9b, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3148"
+    imageFile: {fileID: 2800000, guid: a92542ad121881741961187926729146, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u314A"
+    imageFile: {fileID: 2800000, guid: c0beae9a9f6f78741961bc9bbe276e96, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u314B"
+    imageFile: {fileID: 2800000, guid: 17213ea60b4e7804a81bfb8097a3f060, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u314C"
+    imageFile: {fileID: 2800000, guid: f3516d6a4bac57f439ca93f4853ba0b1, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u314D"
+    imageFile: {fileID: 2800000, guid: 131c9eab99b7d6c43a66dafe8b80702a, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u314E"
+    imageFile: {fileID: 2800000, guid: 41e5b690e886ccd4ea859d7d8c51a1d6, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3132"
+    imageFile: {fileID: 0}
+    videoFile: {fileID: 32900000, guid: f03627190f1b8104e8a7e667516fecde, type: 3}
+  - letter: "\u3138"
+    imageFile: {fileID: 0}
+    videoFile: {fileID: 32900000, guid: 77ab03b2d3a399646aaebab5c95894e9, type: 3}
+  - letter: "\u3143"
+    imageFile: {fileID: 0}
+    videoFile: {fileID: 32900000, guid: 0fe9190b7d7883643830f01e27253e57, type: 3}
+  - letter: "\u3146"
+    imageFile: {fileID: 0}
+    videoFile: {fileID: 32900000, guid: 5b54d8c0307d22c4dbfe0485157147bf, type: 3}
+  - letter: "\u3149"
+    imageFile: {fileID: 0}
+    videoFile: {fileID: 32900000, guid: bd852d4060c1d1f4b9251d754d9fd59d, type: 3}
+  - letter: "\u314F"
+    imageFile: {fileID: 2800000, guid: 62a0788570bedea4ea42b679972e4034, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3150"
+    imageFile: {fileID: 2800000, guid: cc9542119f61c5341b37ab88765f520e, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3151"
+    imageFile: {fileID: 2800000, guid: 5d42b8e4131f18547a36efc56cd503d6, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3152"
+    imageFile: {fileID: 2800000, guid: 9c54fac70c4f4fb4ca563ad7e028d9cc, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3153"
+    imageFile: {fileID: 2800000, guid: d3ec928ce7ddd6f4bb528280fdf5057c, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3154"
+    imageFile: {fileID: 2800000, guid: 9a92aec92991d524ba2e580a076c62fa, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3155"
+    imageFile: {fileID: 2800000, guid: c95b8af2e0c15a042914a35d52ece586, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3156"
+    imageFile: {fileID: 2800000, guid: 35ec867d73128594a91e5912fcec5b0c, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3157"
+    imageFile: {fileID: 2800000, guid: 4d113f357489c5441a832744d2d5d1ca, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3158"
+    imageFile: {fileID: 0}
+    videoFile: {fileID: 32900000, guid: 4b75de0258e419f4394a9c096da72f8f, type: 3}
+  - letter: "\u3159"
+    imageFile: {fileID: 0}
+    videoFile: {fileID: 32900000, guid: e0d30639d8735284f82657a439766aff, type: 3}
+  - letter: "\u315A"
+    imageFile: {fileID: 2800000, guid: 702e45822903dfe4b8187da2351855d1, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u315B"
+    imageFile: {fileID: 2800000, guid: d0baf493fd98f7945851361de8d69b2b, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u315C"
+    imageFile: {fileID: 2800000, guid: 331d8adc4017f4b41bdc6e94ff9000fd, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u315D"
+    imageFile: {fileID: 0}
+    videoFile: {fileID: 32900000, guid: 31c7bd3d8bca92d4fa56cff7c91462dd, type: 3}
+  - letter: "\u315E"
+    imageFile: {fileID: 0}
+    videoFile: {fileID: 32900000, guid: 872dc8bb784b7924e9a6946effaf4ee8, type: 3}
+  - letter: "\u315F"
+    imageFile: {fileID: 0}
+    videoFile: {fileID: 32900000, guid: f0a446793cbd3a54594376e05421bf18, type: 3}
+  - letter: "\u3160"
+    imageFile: {fileID: 2800000, guid: 8b3008da21e3ebb438e80512038666b5, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3161"
+    imageFile: {fileID: 2800000, guid: 083f18450ef0cd74bb0933cb241bc82a, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3162"
+    imageFile: {fileID: 2800000, guid: d6524a3f8fbfa8346afcfaa10c7fe6c7, type: 3}
+    videoFile: {fileID: 0}
+  - letter: "\u3163"
+    imageFile: {fileID: 2800000, guid: de38d3a9edd0f6943a3006e4e18822fb, type: 3}
+    videoFile: {fileID: 0}
 --- !u!114 &1794637095
 MonoBehaviour:
   m_ObjectHideFlags: 0
