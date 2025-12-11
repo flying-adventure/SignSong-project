@@ -1,5 +1,6 @@
 # Sign Song Unity Project
-<img width="1438" height="831" alt="image" src="https://github.com/user-attachments/assets/74d8d5f5-4927-4cad-9b20-ecef887c1c1c" />
+<img width="1289" height="751" alt="image" src="https://github.com/user-attachments/assets/fb9bff73-2be3-4351-a38e-530c9a92f86f" />
+
 
 ---
 
@@ -13,5 +14,9 @@
 
 ---
 
-### 전체 기능 Flow Chart
-<img width="1077" height="740" alt="image" src="https://github.com/user-attachments/assets/e9b46624-3a18-4463-8659-1502f0e9b2f0" />
+### 제작 과정 Flow Chart
+<img width="1361" height="306" alt="image" src="https://github.com/user-attachments/assets/a8678227-d2e6-42f8-aa01-d5aeea3d7c8b" />
+
+### 구현 기능 Flow Chart
+<img width="1167" height="525" alt="image" src="https://github.com/user-attachments/assets/7632fd64-0a6c-4dea-8904-5c930ecd851f" />
+
