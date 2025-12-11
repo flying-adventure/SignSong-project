@@ -10,6 +10,6 @@ public class StartMainLoader : MonoBehaviour
 
     void LoadNext()
     {
-        SceneManager.LoadScene("ÁöÈ­_list");
+        SceneManager.LoadScene("Sign_list");
     }
 }

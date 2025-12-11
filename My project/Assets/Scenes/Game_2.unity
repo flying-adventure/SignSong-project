@@ -1740,13 +1740,13 @@ RectTransform:
   - {fileID: 89773005}
   - {fileID: 2010783180}
   - {fileID: 280235304}
-  - {fileID: 859000647}
   - {fileID: 1587368574}
   - {fileID: 29013865}
   - {fileID: 945118640}
   - {fileID: 1918542920}
-  - {fileID: 1110429379}
   - {fileID: 4796824}
+  - {fileID: 1110429379}
+  - {fileID: 859000647}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2075,7 +2075,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7b45b3f5af69439fb257d60b32b87af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  songClip: {fileID: 8300000, guid: 954fb140fffa24155969e1481131bf3f, type: 3}
+  songClip: {fileID: 8300000, guid: 7aa6cea77cabd9d44a16210542e1fc05, type: 3}
   chartFile: {fileID: 4900000, guid: 17610ba090cb9425b80ade0c8cb1a32d, type: 3}
   noteArea: {fileID: 1110429379}
   laneSpawnTops:
@@ -2566,8 +2566,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 24.3, y: 0}
+  m_SizeDelta: {x: 39.6705, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1865554949
 MonoBehaviour:
@@ -2582,7 +2582,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

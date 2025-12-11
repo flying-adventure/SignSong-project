@@ -16,13 +16,13 @@ public class DropdownSceneLoader : MonoBehaviour
         switch (index)
         {
             case 0:
-                SceneManager.LoadScene("지화_list");
+                SceneManager.LoadScene("Sign_list");
                 break;
             case 1:
-                SceneManager.LoadScene("동요_list");
+                SceneManager.LoadScene("Dongyo_list");
                 break;
             case 2:
-                SceneManager.LoadScene("가요_list");
+                SceneManager.LoadScene("Gayo_list");
                 break;
         }
     }

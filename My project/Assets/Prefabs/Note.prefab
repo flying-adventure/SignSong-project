@@ -154,10 +154,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: wow
+  m_text: " \uB178\uD2B8"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 42cb0f13bbc70474a89c7c1689ed54c7, type: 2}
-  m_sharedMaterial: {fileID: 6482968763445993686, guid: 42cb0f13bbc70474a89c7c1689ed54c7, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: e89cd2ee56d86f24581411ffede1baf1, type: 2}
+  m_sharedMaterial: {fileID: -6981278926895538512, guid: e89cd2ee56d86f24581411ffede1baf1, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
