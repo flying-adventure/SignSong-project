@@ -327,6 +327,74 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 48663573}
   m_CullTransparentMesh: 1
+--- !u!1 &72250770
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 72250772}
+  - component: {fileID: 72250771}
+  m_Layer: 0
+  m_Name: Video Player
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!328 &72250771
+VideoPlayer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 72250770}
+  m_Enabled: 1
+  m_VideoClip: {fileID: 0}
+  m_TargetCameraAlpha: 1
+  m_TargetCamera3DLayout: 0
+  m_TargetCamera: {fileID: 0}
+  m_TargetTexture: {fileID: 0}
+  m_TimeReference: 0
+  m_TargetMaterialRenderer: {fileID: 0}
+  m_TargetMaterialProperty: <noninit>
+  m_RenderMode: 2
+  m_AspectRatio: 2
+  m_DataSource: 0
+  m_TimeUpdateMode: 2
+  m_PlaybackSpeed: 1
+  m_AudioOutputMode: 2
+  m_TargetAudioSources:
+  - {fileID: 0}
+  m_DirectAudioVolumes:
+  - 1
+  m_Url: 
+  m_EnabledAudioTracks: 01
+  m_DirectAudioMutes: 00
+  m_ControlledAudioTrackCount: 1
+  m_PlayOnAwake: 1
+  m_SkipOnDrop: 1
+  m_Looping: 0
+  m_WaitForFirstFrame: 1
+  m_FrameReadyEventEnabled: 0
+  m_VideoShaders: []
+--- !u!4 &72250772
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 72250770}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1140.0007, y: 540, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &280235303
 GameObject:
   m_ObjectHideFlags: 0
@@ -1082,8 +1150,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   letterText: {fileID: 1794637095}
   countdownText: {fileID: 860106283}
-  displayScreen: {fileID: 0}
-  videoPlayer: {fileID: 0}
+  displayScreen: {fileID: 612609618}
+  videoPlayer: {fileID: 72250771}
   contentList: []
 --- !u!114 &860106283
 MonoBehaviour:
@@ -2295,7 +2363,7 @@ MonoBehaviour:
   letterText: {fileID: 1794637095}
   countdownText: {fileID: 860106283}
   displayScreen: {fileID: 612609618}
-  videoPlayer: {fileID: 612609620}
+  videoPlayer: {fileID: 72250771}
   contentList:
   - letter: "\u3131"
     imageFile: {fileID: 2800000, guid: d993a416063007c4cb1a4226a638db1f, type: 3}
@@ -2926,3 +2994,4 @@ SceneRoots:
   - {fileID: 333522027}
   - {fileID: 651421380}
   - {fileID: 1752615610}
+  - {fileID: 72250772}

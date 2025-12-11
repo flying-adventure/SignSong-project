@@ -26,6 +26,10 @@ public class PauseController : MonoBehaviour
     public void OnExit()
     {
         Time.timeScale = 1f;
+
+        SceneManager.LoadScene("Dongyo_list");
+
         SceneManager.LoadScene("Sign_list");
+
     }
 }
