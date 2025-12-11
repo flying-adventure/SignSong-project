@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class LetterAndCountdown : MonoBehaviour
 {
@@ -25,6 +26,8 @@ public class LetterAndCountdown : MonoBehaviour
         }
 
         letterText.text = "";
+        SceneManager.LoadScene("result1");
+
     }
 
     IEnumerator CountdownRoutine()
