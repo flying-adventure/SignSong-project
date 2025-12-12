@@ -66,6 +66,7 @@
     <Compile Include="Assets\Scripts\MainMenuButton.cs" />
     <Compile Include="Assets\Scripts\Rhythm\Intergration\ModelPredictionReceiver.cs" />
     <Compile Include="Assets\Scripts\Rhythm\Data\JudgeEvent.cs" />
+    <Compile Include="Assets\Scripts\Rhythm\Runtime\Sign\Landmark\RightHandNormalizer.cs" />
     <Compile Include="Assets\MediaPipeUnity\Samples\Scenes\Object Detection\ObjectDetectionConfig.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark02.cs" />
     <Compile Include="Assets\MediaPipeUnity\Tutorial\Hello World\HelloWorld.cs" />
@@ -99,6 +100,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_B.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\SkewTextExample.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\WarpTextExample.cs" />
+    <Compile Include="Assets\Scripts\Rhythm\Runtime\Sign\TFLiteGenericRunner.cs" />
     <Compile Include="Assets\Scripts\GoToDonyo.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ShaderPropAnimator.cs" />
     <Compile Include="Assets\MediaPipeUnity\Tutorial\Custom Graph\FaceMeshLegacy.cs" />

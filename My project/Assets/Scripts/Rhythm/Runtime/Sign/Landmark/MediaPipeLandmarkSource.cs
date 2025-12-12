@@ -234,4 +234,27 @@ public class MediaPipeLandmarkSource : MonoBehaviour, ILandmarkSource
 
         return feat;
     }
+
+    /// <summary>
+    /// 오른손 21개 포인트만 추출 (지화/spell 모델용)
+    /// </summary>
+    public Vector3[] GetRightHandLandmarks()
+    {
+        var rightArr = new Vector3[21];
+        
+        if (_rightHand != null && _rightHand.Landmark != null && _rightHand.Landmark.Count >= 21)
+        {
+            for (int i = 0; i < 21; i++)
+            {
+                var lm = _rightHand.Landmark[i];
+                rightArr[i] = new Vector3(lm.X, lm.Y, lm.Z);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < 21; i++) rightArr[i] = Vector3.zero;
+        }
+
+        return rightArr;
+    }
 }
