@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ea4b352fad2ded4a87117b9318c608e, type: 3}
   m_Name: Judgement Config
   m_EditorClassIdentifier: Assembly-CSharp::JudgementConfig
-  perfectWindow: 1
-  goodWindow: 2
+  perfectWindow: 0.4
+  goodWindow: 0.8
   minProb: 0.05
   maxDist: 999
   sameSignCooldown: 0.1

@@ -1208,11 +1208,35 @@ PrefabInstance:
       objectReference: {fileID: 8300000, guid: 7aa6cea77cabd9d44a16210542e1fc05, type: 3}
     - target: {fileID: 3052107980385904167, guid: 4f196e365137052408e9a650a71159f1, type: 3}
       propertyPath: minProb
-      value: 0.5
+      value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 3052107980385904167, guid: 4f196e365137052408e9a650a71159f1, type: 3}
+      propertyPath: minVotes
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3052107980385904167, guid: 4f196e365137052408e9a650a71159f1, type: 3}
+      propertyPath: votingWindow
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3052107980385904167, guid: 4f196e365137052408e9a650a71159f1, type: 3}
+      propertyPath: emitCooldownSec
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3434105921560844714, guid: 4f196e365137052408e9a650a71159f1, type: 3}
       propertyPath: m_Name
       value: RhythmSystem
+      objectReference: {fileID: 0}
+    - target: {fileID: 3802280136415710503, guid: 4f196e365137052408e9a650a71159f1, type: 3}
+      propertyPath: modelLatencySec
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3802280136415710503, guid: 4f196e365137052408e9a650a71159f1, type: 3}
+      propertyPath: expectedIdxOffset
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3949212543904867774, guid: 4f196e365137052408e9a650a71159f1, type: 3}
+      propertyPath: globalOffsetSec
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4210704477004496124, guid: 4f196e365137052408e9a650a71159f1, type: 3}
       propertyPath: feeder

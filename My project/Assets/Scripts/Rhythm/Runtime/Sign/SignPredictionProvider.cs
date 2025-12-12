@@ -19,7 +19,7 @@ public class SignPredictionProvider : MonoBehaviour
     public string metaJsonRelPath = "SignModels/sign_meta.json";
 
     [Header("Gating (Classifier)")]
-    public float minProb = 0.2f;
+    public float minProb = 0.05f;
 
     [Header("OOD Gating (Embedding + centroid distance)")]
     public bool useOodGate = false;
@@ -28,11 +28,11 @@ public class SignPredictionProvider : MonoBehaviour
     public float overrideDistanceThreshold = -1f;
 
     [Header("Voting (Stabilization)")]
-    public int votingWindow = 3;
-    public int minVotes = 2;
+    public int votingWindow = 1;
+    public int minVotes = 1;
 
     [Header("Emit")]
-    public float emitCooldownSec = 0.25f; // 같은 sign 연속 방지
+    public float emitCooldownSec = 0.05f; // 같은 sign 연속 방지
 
     [Header("Refs")]
     public AudioClock clock;

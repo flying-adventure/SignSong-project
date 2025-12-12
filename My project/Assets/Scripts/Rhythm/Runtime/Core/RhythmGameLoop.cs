@@ -7,6 +7,8 @@ public class RhythmGameLoop : MonoBehaviour
     public ScoreManager score;
     public NoteLoader noteLoader;
 
+    float _nextLog;
+
     void OnEnable()
     {
         if (engine != null && score != null)
@@ -36,5 +38,11 @@ public class RhythmGameLoop : MonoBehaviour
     {
         float nowSec = clock.NowSec();
         engine.UpdateEngine(nowSec);
+
+        if (Time.unscaledTime >= _nextLog)
+        {
+            _nextLog = Time.unscaledTime + 1f;
+            Debug.Log($"[ClockNow] now={nowSec:F2}");
+        }
     }
 }

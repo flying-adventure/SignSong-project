@@ -6,6 +6,10 @@ public class JudgementEngine : MonoBehaviour
 {
     [SerializeField] private JudgementConfig config;
     [SerializeField] private List<Note> notes = new(); // timeSec 오름차순 정렬
+    [Header("Timing")]
+    [SerializeField] private float chartOffsetSec = 0f;     // CSV(차트) 기준 보정(오디오 앞 무음 등)
+    [SerializeField] private float modelLatencySec = 0f;    // 모델/추론 파이프라인 지연
+    [SerializeField] private int expectedIdxOffset = 0;
 
     public enum JudgeType
     {
@@ -69,8 +73,9 @@ public class JudgementEngine : MonoBehaviour
             var note = notes[_currentIndex];
             if (note.judged) { _currentIndex++; continue; }
 
-            float t0 = note.timeSec;
-
+            float t0Raw = note.timeSec;
+            float t0 = t0Raw + chartOffsetSec + modelLatencySec;
+            
             // 너무 이르면 멈춤
             if (nowSec < t0 - config.goodWindow) break;
 
@@ -78,7 +83,8 @@ public class JudgementEngine : MonoBehaviour
             if (nowSec > t0 + config.goodWindow)
             {
                 if (debugLogs)
-                    Debug.Log($"[MISS] noteId={note.noteId} expectedIdx={note.expectedIdx} t0={t0:F2} now={nowSec:F2}");
+                    Debug.Log($"[MISS] noteId={note.noteId} expectedIdx={note.expectedIdx} t0={t0Raw:F2}(+{modelLatencySec:F2}=>{t0:F2}) now={nowSec:F2}");
+
                 Emit(note, nowSec, -1, nowSec, 0f, 999f, nowSec - t0, JudgeResult.Miss);
                 note.judged = true;
                 _currentIndex++;
@@ -116,8 +122,10 @@ public class JudgementEngine : MonoBehaviour
             if (p.idx == _lastIdx && (p.timeSec - _lastIdxTime) < config.sameSignCooldown)
                 continue;
 
+            int expected = note.expectedIdx + expectedIdxOffset;
+
             // 정답 idx 일치하는 경우에만 판정하도록
-            if (p.idx != note.expectedIdx)
+            if (p.idx != expected)
             {
                 if (debugLogs && !_loggedMapNoteIds.Contains(note.noteId))
                 {
