@@ -2,12 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-#if MEDIAPIPE
 using Mp = Mediapipe;
 using HandTasks = Mediapipe.Tasks.Vision.HandLandmarker;
 using FaceTasks = Mediapipe.Tasks.Vision.FaceLandmarker;
-#endif
 
 /// <summary>
 /// MediaPipe(Hands/Face/Holistic 등)에서 뽑은 landmark를
@@ -18,7 +15,6 @@ public class MediaPipeResultFeeder : MonoBehaviour
     [Header("Target")]
     public MediaPipeLandmarkSource target;
 
-#if MEDIAPIPE
     private bool _printedHandMembers = false;
     private bool _loggedHandError = false;
     private bool _printedFaceMembers = false;
@@ -310,5 +306,4 @@ public class MediaPipeResultFeeder : MonoBehaviour
 
         return null;
     }
-#endif
 }

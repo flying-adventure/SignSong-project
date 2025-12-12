@@ -37,7 +37,7 @@ public class MediaPipeLandmarkSource : MonoBehaviour, ILandmarkSource
         NormalizedLandmarkList pose,
         NormalizedLandmarkList leftHand,
         NormalizedLandmarkList rightHand,
-        NormalizedLandmarkList face = null)
+        NormalizedLandmarkList face)
     {
         // null이면 기존 값 유지, non-null이면 갱신
         if (pose != null)
@@ -81,6 +81,8 @@ public class MediaPipeLandmarkSource : MonoBehaviour, ILandmarkSource
         _hasFace =
             (_face != null && _face.Landmark != null && _face.Landmark.Count > 0) ||
             (_lastFace5 != null);
+
+        Debug.Log($"[SetFromMediaPipe] hasFace={_hasFace} faceNow={(face!=null)} lastFace5={(_lastFace5!=null)}");
     }
 
     /// <summary>
@@ -117,11 +119,12 @@ public class MediaPipeLandmarkSource : MonoBehaviour, ILandmarkSource
     /// </summary>
     public float[] GetFeature141()
     {
-        Debug.Log("GET!");
+        Debug.Log($"[GetFeat141] hasFace={_hasFace} face={( _face!=null)} lastFace5={(_lastFace5!=null)}");
         // 0) face가 없으면 전체 0 → 파이썬과 동일한 동작
         if ((_face == null || _face.Landmark == null || _face.Landmark.Count == 0) 
             && _lastFace5 == null)
         {
+            Debug.Log("[Feat141] face missing, return ZERO");
             return new float[141];
         }
 
