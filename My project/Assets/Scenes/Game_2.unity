@@ -1228,7 +1228,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3802280136415710503, guid: 4f196e365137052408e9a650a71159f1, type: 3}
       propertyPath: chartOffsetSec
-      value: -1.57
+      value: -1.5
       objectReference: {fileID: 0}
     - target: {fileID: 3802280136415710503, guid: 4f196e365137052408e9a650a71159f1, type: 3}
       propertyPath: modelLatencySec
@@ -1240,7 +1240,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3949212543904867774, guid: 4f196e365137052408e9a650a71159f1, type: 3}
       propertyPath: globalOffsetSec
-      value: 0
+      value: -0.6
       objectReference: {fileID: 0}
     - target: {fileID: 4210704477004496124, guid: 4f196e365137052408e9a650a71159f1, type: 3}
       propertyPath: feeder
