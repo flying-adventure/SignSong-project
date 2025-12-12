@@ -89,6 +89,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8533c91da639f4e3189e229172096322, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  noteFont: {fileID: 11400000, guid: e89cd2ee56d86f24581411ffede1baf1, type: 2}
+  previewText: 
 --- !u!1 &9209805840877148230
 GameObject:
   m_ObjectHideFlags: 0

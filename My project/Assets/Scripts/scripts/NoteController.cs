@@ -13,12 +13,31 @@ public class NoteController : MonoBehaviour
 
     private TextMeshProUGUI label;
     private bool initialized = false;
+    public TMP_FontAsset noteFont; // assigned via Inspector or loaded from Resources
+    [Header("Editor Preview")]
+    [Tooltip("Inspector에서 에디터 미리보기를 위해 사용할 텍스트입니다. 비어있으면 런타임 값이 사용됩니다.")]
+    public string previewText;
 
     void Awake()
     {
         rect = GetComponent<RectTransform>();
         label = GetComponentInChildren<TextMeshProUGUI>();
     }
+
+#if UNITY_EDITOR
+    void OnValidate()
+    {
+        // 에디터에서 previewText가 설정되어 있으면 바로 라벨에 적용해 미리보기 가능
+        if (!string.IsNullOrEmpty(previewText))
+        {
+            label = GetComponentInChildren<TextMeshProUGUI>();
+            if (label != null)
+            {
+                label.text = previewText;
+            }
+        }
+    }
+#endif
 
     public void Init(NoteData data,
                      RectTransform spawnTop,
@@ -37,7 +56,19 @@ public class NoteController : MonoBehaviour
         rect.position = startPoint.position;
 
         if (label != null)
+        {
             label.text = data.word;
+            if (noteFont == null)
+            {
+                // Try to load the provided TMP asset from Resources
+                noteFont = Resources.Load<TMP_FontAsset>("Fonts & Materials/April16thTTF-Promise SDF");
+            }
+
+            if (noteFont != null)
+            {
+                label.font = noteFont;
+            }
+        }
 
         initialized = true;
     }
