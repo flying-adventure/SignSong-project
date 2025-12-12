@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.github.asus4.tflite": {
+      "version": "https://github.com/asus4/tf-lite-unity-sample.git?path=/Packages/com.github.asus4.tflite",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "5c75c79e609196b7a0caf27e72425ce9b1fdb4f6"
+    },
     "com.github.homuler.mediapipe": {
       "version": "file:com.github.homuler.mediapipe",
       "depth": 0,
