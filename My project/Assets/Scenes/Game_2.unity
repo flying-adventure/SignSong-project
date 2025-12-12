@@ -1227,6 +1227,10 @@ PrefabInstance:
       value: RhythmSystem
       objectReference: {fileID: 0}
     - target: {fileID: 3802280136415710503, guid: 4f196e365137052408e9a650a71159f1, type: 3}
+      propertyPath: chartOffsetSec
+      value: -1.57
+      objectReference: {fileID: 0}
+    - target: {fileID: 3802280136415710503, guid: 4f196e365137052408e9a650a71159f1, type: 3}
       propertyPath: modelLatencySec
       value: 2
       objectReference: {fileID: 0}
