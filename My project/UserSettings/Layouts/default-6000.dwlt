@@ -328,7 +328,7 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 78.66667
+    y: 24
     width: 312.33334
     height: 269.33334
   m_SerializedDataModeController:
@@ -393,8 +393,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Scene\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 313.33334
-    y: 78.66667
+    x: 314.33334
+    y: 24
     width: 315.33334
     height: 269.33334
   m_SerializedDataModeController:
@@ -853,9 +853,9 @@ MonoBehaviour:
   m_AudioPlay: 0
   m_DebugDrawModesUseInteractiveLightBakingData: 0
   m_Position:
-    m_Target: {x: 276.7102, y: 218.01799, z: -6.98501}
+    m_Target: {x: -662.38434, y: 814.0394, z: -10.027175}
     speed: 2
-    m_Value: {x: 276.7102, y: 218.01799, z: -6.98501}
+    m_Value: {x: -662.38434, y: 814.0394, z: -10.027175}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -905,9 +905,9 @@ MonoBehaviour:
     speed: 2
     m_Value: {x: 0, y: 0, z: 0, w: 1}
   m_Size:
-    m_Target: 298.548
+    m_Target: 14.842147
     speed: 2
-    m_Value: 298.548
+    m_Value: 14.842147
   m_Ortho:
     m_Target: 1
     speed: 2
@@ -1015,8 +1015,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Simulator\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 630.6667
-    y: 78.66667
+    x: 631.6667
+    y: 24
     width: 460.6667
     height: 269.33334
   m_SerializedDataModeController:
@@ -1046,7 +1046,7 @@ MonoBehaviour:
   m_UseMipMap: 0
   m_SimulatorState:
     controlPanelVisible: 0
-    controlPanelWidth: 0
+    controlPanelWidth: NaN
     controlPanelFoldoutKeys:
     - UnityEditor.DeviceSimulation.ApplicationSettingsPlugin
     controlPanelFoldoutValues: 00
@@ -1131,7 +1131,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 2ec20000
     m_LastClickedID: 49710
-    m_ExpandedIDs: 00000000d0c10000
+    m_ExpandedIDs: 
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1160,7 +1160,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000d0c10000
+    m_ExpandedIDs: 
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1240,7 +1240,7 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 374
+    y: 319.33334
     width: 1092.3334
     height: 598.6666
   m_SerializedDataModeController:
@@ -1275,8 +1275,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Inspector\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 1093.3334
-    y: 78.66667
+    x: 1094.3334
+    y: 24
     width: 612.33325
     height: 894
   m_SerializedDataModeController:

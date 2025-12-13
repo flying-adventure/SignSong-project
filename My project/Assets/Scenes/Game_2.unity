@@ -1251,6 +1251,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 359029548}
     - target: {fileID: 4210704477004496124, guid: 4f196e365137052408e9a650a71159f1, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4210704477004496124, guid: 4f196e365137052408e9a650a71159f1, type: 3}
       propertyPath: annotationController
       value: 
       objectReference: {fileID: 693795924}

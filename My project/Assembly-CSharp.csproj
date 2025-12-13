@@ -93,6 +93,7 @@
     <Compile Include="Assets\Scripts\HandLandmarkProvider.cs" />
     <Compile Include="Assets\MediaPipeUnity\Samples\Scenes\Face Detection\FaceDetectorRunner.cs" />
     <Compile Include="Assets\Scripts\UI\RhythmUIController.cs" />
+    <Compile Include="Assets\Scripts\scripts\WebCamProbe.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexJitter.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_UiFrameRateCounter.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexZoom.cs" />

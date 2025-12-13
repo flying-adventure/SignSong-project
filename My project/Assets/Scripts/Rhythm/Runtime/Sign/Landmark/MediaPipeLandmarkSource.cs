@@ -3,18 +3,27 @@ using Mediapipe; // NormalizedLandmarkList, NormalizedLandmark
 
 public class MediaPipeLandmarkSource : MonoBehaviour, ILandmarkSource
 {
-    // 47 points * 3 = 141
     public const int NumPoints = 47;
     public const int FeatDim = NumPoints * 3;
 
-    [Header("Optional (depends on your training setup)")]
-    [Tooltip("21(LH) + 21(RH) + 5(POSE) = 47 구성으로 가정. 마지막 5개 pose index를 여기서 지정.")]
-    public int[] pose5Indices = new int[] { 11, 12, 13, 14, 0 }; // (지금은 안 쓰지만 남겨둬도 무방)
-
-    [Tooltip("카메라 미러링이면 X 뒤집기")]
+    [Header("Optional")]
+    [Tooltip("카메라 미러링이면 X 뒤집기 (정규화된 feature 기준)")]
     public bool flipX = false;
 
-    // MediaPipe 원본 (Holistic / Hand / Face 결과)
+    public enum Feature141Mode
+    {
+        StrictFaceRequired, // face 없으면 141 전부 0 (파이썬과 동일)
+        HandFallback        // face 없으면 손 기준으로 정규화 + face는 0
+    }
+
+    [Header("Feature Mode")]
+    public Feature141Mode feature141Mode = Feature141Mode.HandFallback;
+
+    [Header("Debug")]
+    public bool debugLog = false;
+    public int logEveryNFrames = 30;
+
+    // MediaPipe raw results
     private NormalizedLandmarkList _pose;
     private NormalizedLandmarkList _leftHand;
     private NormalizedLandmarkList _rightHand;
@@ -26,12 +35,13 @@ public class MediaPipeLandmarkSource : MonoBehaviour, ILandmarkSource
     public bool HasAnyHand => _hasAnyHand;
     public bool HasFace => _hasFace;
 
-    // 얼굴 5포인트 인덱스 (파이썬과 동일)
+    // face 5pt indices (nose, left_eye, right_eye, mouth_l, mouth_r)
     private static readonly int[] FaceIndices = { 1, 33, 263, 61, 291 };
-    private Vector3[] _lastFace5; 
+    private Vector3[] _lastFace5;
+    private bool _lastFace5Valid;
 
     /// <summary>
-    /// Holistic / Hand / Face 러너에서 호출하는 진입점
+    /// Runners/Feeder에서 들어오는 진입점
     /// </summary>
     public void SetFromMediaPipe(
         NormalizedLandmarkList pose,
@@ -39,38 +49,40 @@ public class MediaPipeLandmarkSource : MonoBehaviour, ILandmarkSource
         NormalizedLandmarkList rightHand,
         NormalizedLandmarkList face)
     {
-        // null이면 기존 값 유지, non-null이면 갱신
-        if (pose != null)
-            _pose = pose;
-
-        if (leftHand != null)
-            _leftHand = leftHand;
-
-        if (rightHand != null)
-            _rightHand = rightHand;
+        // null이면 유지 / non-null이면 갱신(빈 리스트도 “갱신”으로 취급해서 clear 가능)
+        if (pose != null) _pose = pose;
+        if (leftHand != null) _leftHand = leftHand;
+        if (rightHand != null) _rightHand = rightHand;
 
         if (face != null)
         {
             _face = face;
 
-            // 여기서 5포인트만 미리 캐싱해 두면, 다음 프레임 face가 없어도 사용 가능
+            // 캐싱
             if (_face.Landmark != null && _face.Landmark.Count > 0)
             {
                 if (_lastFace5 == null || _lastFace5.Length != FaceIndices.Length)
                     _lastFace5 = new Vector3[FaceIndices.Length];
 
+                bool ok = true;
                 for (int i = 0; i < FaceIndices.Length; i++)
                 {
                     int idx = FaceIndices[i];
                     if (idx < 0 || idx >= _face.Landmark.Count)
                     {
                         _lastFace5[i] = Vector3.zero;
+                        ok = false;
                         continue;
                     }
 
                     var lm = _face.Landmark[idx];
                     _lastFace5[i] = new Vector3(lm.X, lm.Y, lm.Z);
                 }
+                _lastFace5Valid = ok;
+            }
+            else
+            {
+                _lastFace5Valid = false;
             }
         }
 
@@ -80,22 +92,22 @@ public class MediaPipeLandmarkSource : MonoBehaviour, ILandmarkSource
 
         _hasFace =
             (_face != null && _face.Landmark != null && _face.Landmark.Count > 0) ||
-            (_lastFace5 != null);
+            (_lastFace5 != null && _lastFace5Valid);
 
-        Debug.Log($"[SetFromMediaPipe] hasFace={_hasFace} faceNow={(face!=null)} lastFace5={(_lastFace5!=null)}");
+        if (debugLog && (Time.frameCount % Mathf.Max(1, logEveryNFrames) == 0))
+        {
+            Debug.Log($"[SetFromMediaPipe] hasAnyHand={_hasAnyHand} hasFace={_hasFace} faceNow={(face != null)} lastFace5Valid={_lastFace5Valid}");
+        }
     }
 
-    /// <summary>
-    /// 옛 코드 호환용. 현재는 SignPredictionProvider가 GetFeature141만 쓰지만,
-    /// 다른 곳에서 포즈/손 좌표를 보고 싶을 때를 위해 유지.
-    /// </summary>
-    public bool TryGet(out Vector3[] pose, out Vector3[] left, out Vector3[] right)
+    // ILandmarkSource 요구 멤버 (CS0535 해결 포인트)
+    public bool TryGet(out Vector3[] a, out Vector3[] b, out Vector3[] c)
     {
-        pose = ToVec3Array(_pose);
-        left = ToVec3Array(_leftHand);
-        right = ToVec3Array(_rightHand);
-
-        return (pose != null) || (left != null) || (right != null);
+        // 관례: (pose, leftHand, rightHand)
+        a = ToVec3Array(_pose);
+        b = ToVec3Array(_leftHand);
+        c = ToVec3Array(_rightHand);
+        return (a != null) || (b != null) || (c != null);
     }
 
     private static Vector3[] ToVec3Array(NormalizedLandmarkList list)
@@ -113,141 +125,169 @@ public class MediaPipeLandmarkSource : MonoBehaviour, ILandmarkSource
         return arr;
     }
 
-    /// <summary>
-    /// 파이썬 normalize_features(left_hand, right_hand, face)에 해당.
-    /// face가 없으면 141 전부 0.
-    /// </summary>
     public float[] GetFeature141()
     {
-        Debug.Log($"[GetFeat141] hasFace={_hasFace} face={( _face!=null)} lastFace5={(_lastFace5!=null)}");
-        // 0) face가 없으면 전체 0 → 파이썬과 동일한 동작
-        if ((_face == null || _face.Landmark == null || _face.Landmark.Count == 0) 
-            && _lastFace5 == null)
+        bool faceAvailable =
+            (_face != null && _face.Landmark != null && _face.Landmark.Count > 0) ||
+            (_lastFace5 != null && _lastFace5Valid);
+
+        if (!faceAvailable && feature141Mode == Feature141Mode.StrictFaceRequired)
         {
-            Debug.Log("[Feat141] face missing, return ZERO");
+            // 파이썬과 동일: face 없으면 141 전부 0
             return new float[141];
         }
 
-        // 1) 얼굴 5포인트 추출 (nose, left_eye, right_eye, mouth_l, mouth_r)
+        // 1) 정규화 기준(앵커/스케일) 결정
+        Vector3 anchor;
+        float scale;
+
+        if (faceAvailable)
+        {
+            Vector3[] face5 = ExtractFace5();
+            anchor = face5[0]; // nose
+
+            Vector3 eyeL = face5[1];
+            Vector3 eyeR = face5[2];
+            scale = (eyeL - eyeR).magnitude;
+            if (scale < 1e-6f) scale = 1e-6f;
+        }
+        else
+        {
+            // HandFallback: 손 기준
+            Vector3 wrist = GetWristOrZero();
+            Vector3 mcp = GetPointFromAnyHand(9); // middle_mcp
+            anchor = wrist;
+
+            scale = (mcp - wrist).magnitude;
+            if (scale < 1e-6f) scale = 1e-6f;
+        }
+
+        Vector3 Norm(Vector3 v)
+        {
+            var outv = (v - anchor) / scale;
+            if (flipX) outv.x = -outv.x;
+            return outv;
+        }
+
+        // 2) hands
+        var leftArr = new Vector3[21];
+        var rightArr = new Vector3[21];
+        FillHand(_leftHand, leftArr, Norm);
+        FillHand(_rightHand, rightArr, Norm);
+
+        // 3) face 5pt (없으면 0)
+        var faceArr = new Vector3[5];
+        if (faceAvailable)
+        {
+            var face5 = ExtractFace5();
+            for (int i = 0; i < 5; i++) faceArr[i] = Norm(face5[i]);
+        }
+        else
+        {
+            for (int i = 0; i < 5; i++) faceArr[i] = Vector3.zero;
+        }
+
+        // 4) flatten
+        var feat = new float[141];
+        int k = 0;
+
+        for (int i = 0; i < 21; i++) { feat[k++] = leftArr[i].x; feat[k++] = leftArr[i].y; feat[k++] = leftArr[i].z; }
+        for (int i = 0; i < 21; i++) { feat[k++] = rightArr[i].x; feat[k++] = rightArr[i].y; feat[k++] = rightArr[i].z; }
+        for (int i = 0; i < 5; i++)  { feat[k++] = faceArr[i].x; feat[k++] = faceArr[i].y; feat[k++] = faceArr[i].z; }
+
+        if (debugLog && (Time.frameCount % Mathf.Max(1, logEveryNFrames) == 0))
+        {
+            float absMean = 0f;
+            for (int i = 0; i < feat.Length; i++) absMean += Mathf.Abs(feat[i]);
+            absMean /= feat.Length;
+            Debug.Log($"[Feat141] mode={feature141Mode} faceAvail={faceAvailable} hasAnyHand={_hasAnyHand} absMean={absMean:F4}");
+        }
+
+        return feat;
+    }
+
+    private Vector3[] ExtractFace5()
+    {
         var face = new Vector3[FaceIndices.Length];
+
         if (_face != null && _face.Landmark != null && _face.Landmark.Count > 0)
         {
-            // 현재 프레임 face 사용
             for (int i = 0; i < FaceIndices.Length; i++)
             {
                 int idx = FaceIndices[i];
-                if (idx < 0 || idx >= _face.Landmark.Count)
-                {
-                    face[i] = Vector3.zero;
-                    continue;
-                }
-
+                if (idx < 0 || idx >= _face.Landmark.Count) { face[i] = Vector3.zero; continue; }
                 var lm = _face.Landmark[idx];
                 face[i] = new Vector3(lm.X, lm.Y, lm.Z);
             }
         }
         else
         {
-            // 현재 프레임 face 없으면 마지막 얼굴(_lastFace5) 사용
-            for (int i = 0; i < FaceIndices.Length; i++)
-                face[i] = _lastFace5[i];
+            for (int i = 0; i < FaceIndices.Length; i++) face[i] = _lastFace5[i];
         }
 
-        // nose = 얼굴 첫 포인트
-        Vector3 nose = face[0];
-
-        // face_width = 왼눈(33) - 오른눈(263) 거리
-        Vector3 eyeL = face[1];
-        Vector3 eyeR = face[2];
-        float faceWidth = (eyeL - eyeR).magnitude;
-        if (faceWidth < 1e-6f) faceWidth = 1e-6f;
-
-        // 파이썬 norm: (x - nose) / face_width
-        Vector3 Norm(Vector3 v) => (v - nose) / faceWidth;
-
-        // 2) 왼손/오른손 21개 정규화
-        var leftArr  = new Vector3[21];
-        var rightArr = new Vector3[21];
-
-        if (_leftHand != null && _leftHand.Landmark != null && _leftHand.Landmark.Count >= 21)
-        {
-            for (int i = 0; i < 21; i++)
-            {
-                var lm = _leftHand.Landmark[i];
-                leftArr[i] = Norm(new Vector3(lm.X, lm.Y, lm.Z));
-            }
-        }
-        else
-        {
-            for (int i = 0; i < 21; i++) leftArr[i] = Vector3.zero;
-        }
-
-        if (_rightHand != null && _rightHand.Landmark != null && _rightHand.Landmark.Count >= 21)
-        {
-            for (int i = 0; i < 21; i++)
-            {
-                var lm = _rightHand.Landmark[i];
-                rightArr[i] = Norm(new Vector3(lm.X, lm.Y, lm.Z));
-            }
-        }
-        else
-        {
-            for (int i = 0; i < 21; i++) rightArr[i] = Vector3.zero;
-        }
-
-        // 3) 얼굴 5포인트도 정규화
-        for (int i = 0; i < face.Length; i++)
-            face[i] = Norm(face[i]);
-
-        // 4) flatten: left(21*3) + right(21*3) + face(5*3) = 141
-        var feat = new float[141];
-        int k = 0;
-
-        for (int i = 0; i < 21; i++)
-        {
-            feat[k++] = leftArr[i].x;
-            feat[k++] = leftArr[i].y;
-            feat[k++] = leftArr[i].z;
-        }
-
-        for (int i = 0; i < 21; i++)
-        {
-            feat[k++] = rightArr[i].x;
-            feat[k++] = rightArr[i].y;
-            feat[k++] = rightArr[i].z;
-        }
-
-        for (int i = 0; i < 5; i++)
-        {
-            feat[k++] = face[i].x;
-            feat[k++] = face[i].y;
-            feat[k++] = face[i].z;
-        }
-
-        if (Application.isEditor)
-        {
-            float absMean = 0f;
-            for (int i = 0; i < feat.Length; i++) absMean += Mathf.Abs(feat[i]);
-            absMean /= feat.Length;
-            Debug.Log($"[Feat141] absMean={absMean:F4}");
-        }
-
-        return feat;
+        return face;
     }
 
-    /// <summary>
-    /// 오른손 21개 포인트만 추출 (지화/spell 모델용)
-    /// </summary>
+    private static void FillHand(NormalizedLandmarkList hand, Vector3[] dst, System.Func<Vector3, Vector3> norm)
+    {
+        if (hand != null && hand.Landmark != null && hand.Landmark.Count >= 21)
+        {
+            for (int i = 0; i < 21; i++)
+            {
+                var lm = hand.Landmark[i];
+                dst[i] = norm(new Vector3(lm.X, lm.Y, lm.Z));
+            }
+        }
+        else
+        {
+            for (int i = 0; i < 21; i++) dst[i] = Vector3.zero;
+        }
+    }
+
+    private Vector3 GetWristOrZero()
+    {
+        // right wrist 우선
+        if (_rightHand != null && _rightHand.Landmark != null && _rightHand.Landmark.Count >= 1)
+        {
+            var lm = _rightHand.Landmark[0];
+            return new Vector3(lm.X, lm.Y, lm.Z);
+        }
+        if (_leftHand != null && _leftHand.Landmark != null && _leftHand.Landmark.Count >= 1)
+        {
+            var lm = _leftHand.Landmark[0];
+            return new Vector3(lm.X, lm.Y, lm.Z);
+        }
+        return Vector3.zero;
+    }
+
+    private Vector3 GetPointFromAnyHand(int idx)
+    {
+        if (_rightHand != null && _rightHand.Landmark != null && _rightHand.Landmark.Count > idx)
+        {
+            var lm = _rightHand.Landmark[idx];
+            return new Vector3(lm.X, lm.Y, lm.Z);
+        }
+        if (_leftHand != null && _leftHand.Landmark != null && _leftHand.Landmark.Count > idx)
+        {
+            var lm = _leftHand.Landmark[idx];
+            return new Vector3(lm.X, lm.Y, lm.Z);
+        }
+        return Vector3.zero;
+    }
+
     public Vector3[] GetRightHandLandmarks()
     {
         var rightArr = new Vector3[21];
-        
+
         if (_rightHand != null && _rightHand.Landmark != null && _rightHand.Landmark.Count >= 21)
         {
             for (int i = 0; i < 21; i++)
             {
                 var lm = _rightHand.Landmark[i];
                 rightArr[i] = new Vector3(lm.X, lm.Y, lm.Z);
+
+                // RightHandNormalizer가 "원본(0~1) 좌표"를 기대한다면, 좌우반전은 보통 1-x
+                if (flipX) rightArr[i].x = 1f - rightArr[i].x;
             }
         }
         else

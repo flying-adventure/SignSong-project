@@ -24,7 +24,7 @@ GameObject:
   - component: {fileID: 4210704477004496124}
   - component: {fileID: 6304156483739214262}
   m_Layer: 0
-  m_Name: RhythmSystem
+  m_Name: RhythmSystem_FaceHand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

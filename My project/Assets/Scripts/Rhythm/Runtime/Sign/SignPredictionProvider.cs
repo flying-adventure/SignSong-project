@@ -99,6 +99,14 @@ public class SignPredictionProvider : MonoBehaviour
     public float decisionIntervalSec = 3.0f;
     private float decisionTimer = 0f;
 
+    [Header("Spell Mode Runtime")]
+    [Tooltip("true면 리듬게임용: 매 프레임(슬라이딩) 추론 + voting/cooldown 사용. false면 기존 3초 단발/lock 모드.")]
+    public bool spellRealtimeForRhythm = true;
+
+    [Tooltip("Realtime일 때 최소 누적 프레임 비율(SeqLen의 몇 %부터 추론 시작할지)")]
+    [Range(0.1f, 1.0f)]
+    public float spellMinBufferRatio = 0.5f;
+
     // spell lock: once a spell is accepted, hold until hand disappears
     private bool spellLocked = false;
     private int spellLockedLabel = -1;
@@ -386,6 +394,16 @@ public class SignPredictionProvider : MonoBehaviour
 
         float bestProb = SoftmaxMaxProb(logits, bestIdx);
 
+        if (!landmarkSource.HasFace)
+        {
+            if (debugLogs && Time.unscaledTime >= _nextDropLogTime)
+            {
+                _nextDropLogTime = Time.unscaledTime + debugDropEverySec;
+                Debug.Log("[Drop-WORD] NO_FACE (skip)");
+            }
+            return;
+        }
+
         if (debugLogs && Time.unscaledTime >= _nextPredLogTime)
         {
             _nextPredLogTime = Time.unscaledTime + debugPredEverySec;
@@ -417,71 +435,132 @@ public class SignPredictionProvider : MonoBehaviour
 
     private void UpdateSpellMode()
     {
-        // Spell mode behavior:
-        // - accumulate normalized right-hand frames (sliding)
-        // - make one decision every decisionIntervalSec seconds
-        // - if accepted, lock result until hand disappears
-
-        // reset lock when hand disappears
+        // ---------------------------
+        // 0) 손이 없으면 리셋
+        // ---------------------------
         if (!landmarkSource.HasAnyHand)
         {
-            if (spellLocked)
-            {
-                spellLocked = false;
-                spellLockedLabel = -1;
-                seq.Clear();
-            }
+            // 손이 사라지면 상태 초기화
+            spellLocked = false;
+            spellLockedLabel = -1;
             decisionTimer = 0f;
+            seq.Clear();
+
+            // voting도 초기화(안 하면 이전 결과가 남아 오판정 가능)
+            for (int i = 0; i < voteRing.Length; i++) voteRing[i] = -1;
+            votePos = 0;
+            voteCount = 0;
+
             return;
         }
 
-        // if already locked, do nothing (hold the accepted result)
-        if (spellLocked) return;
-
-        // 1) extract & normalize
+        // ---------------------------
+        // 1) 오른손(혹은 feeder가 넣어준 손) 가져오기 + 정규화
+        // ---------------------------
         var rightHand = landmarkSource.GetRightHandLandmarks();
         if (rightHand == null || rightHand.Length != 21) return;
 
         var feat = RightHandNormalizer.NormalizeLandmarks(rightHand);
         if (feat == null || feat.Length != 63) return;
 
-        // 2) push sliding window
+        // (옵션) 입력이 거의 0이면 스킵 (카메라/랜드마크가 실제로 안 들어올 때 방지)
+        if (debugLogs && Time.unscaledTime >= _nextDropLogTime)
+        {
+            float absMean = 0f;
+            for (int i = 0; i < feat.Length; i++) absMean += Mathf.Abs(feat[i]);
+            absMean /= feat.Length;
+            if (absMean < 1e-5f)
+            {
+                _nextDropLogTime = Time.unscaledTime + debugDropEverySec;
+                Debug.Log($"[SpellDrop] FEAT_ZERO absMean={absMean:E3}");
+                return;
+            }
+        }
+
+        // ---------------------------
+        // 2) 슬라이딩 버퍼에 push
+        // ---------------------------
         seq.Push(feat);
 
-        // 3) increment decision timer
+        // ---------------------------
+        // 3) (A) 리듬게임용 실시간 모드: 매 프레임 추론 + ProcessPrediction() 사용
+        // ---------------------------
+        if (spellRealtimeForRhythm)
+        {
+            int need = Mathf.Max(1, Mathf.FloorToInt(TFLiteGenericRunner.SeqLen * spellMinBufferRatio));
+            if (seq.Count < need) return;
+
+            var logits = clsRunner.Run(seq.Snapshot());
+            if (logits == null || logits.Length == 0) return;
+
+            int bestIdx = 0;
+            float bestLogit = logits[0];
+            for (int i = 1; i < logits.Length; i++)
+            {
+                if (logits[i] > bestLogit) { bestLogit = logits[i]; bestIdx = i; }
+            }
+
+            float bestProb = SoftmaxMaxProb(logits, bestIdx);
+
+            if (debugLogs && Time.unscaledTime >= _nextPredLogTime)
+            {
+                _nextPredLogTime = Time.unscaledTime + debugPredEverySec;
+                float nowT = clock != null ? clock.NowSec() : Time.time;
+                Debug.Log($"[PredRaw-SPELL-RT] t={nowT:F2} idx={bestIdx} prob={bestProb:F3}");
+            }
+
+            if (bestProb < minProb)
+            {
+                if (debugLogs && Time.unscaledTime >= _nextDropLogTime)
+                {
+                    _nextDropLogTime = Time.unscaledTime + debugDropEverySec;
+                    Debug.Log($"[Drop-SPELL-RT] LOW_PROB prob={bestProb:F3} < {minProb:F3} bestIdx={bestIdx}");
+                }
+                return;
+            }
+
+            // WORD 모드와 동일 파이프라인(투표/쿨다운/OOD/emit) 타게 만들기
+            ProcessPrediction(bestIdx, bestProb, bestLogit);
+            return;
+        }
+
+        // ---------------------------
+        // 3) (B) 기존 3초 단발 + lock 모드(필요하면 유지)
+        // ---------------------------
+
+        // if already locked, do nothing (hold the accepted result)
+        if (spellLocked) return;
+
         decisionTimer += Time.deltaTime;
         if (decisionTimer < decisionIntervalSec) return;
         decisionTimer = 0f;
 
-        // 4) require at least half buffer
+        // 최소 버퍼 확인
         if (seq.Count < (TFLiteGenericRunner.SeqLen / 2))
         {
             if (debugLogs) Debug.Log($"[Spell] 버퍼 부족: {seq.Count}/{TFLiteGenericRunner.SeqLen}");
             return;
         }
 
-        // 5) single inference decision
-        var logits = clsRunner.Run(seq.Snapshot());
-        if (logits == null || logits.Length == 0) return;
+        var logitsOnce = clsRunner.Run(seq.Snapshot());
+        if (logitsOnce == null || logitsOnce.Length == 0) return;
 
-        int bestIdx = 0;
-        float bestLogit = logits[0];
-        for (int i = 1; i < logits.Length; i++)
+        int bestIdxOnce = 0;
+        float bestLogitOnce = logitsOnce[0];
+        for (int i = 1; i < logitsOnce.Length; i++)
         {
-            if (logits[i] > bestLogit) { bestLogit = logits[i]; bestIdx = i; }
+            if (logitsOnce[i] > bestLogitOnce) { bestLogitOnce = logitsOnce[i]; bestIdxOnce = i; }
         }
 
-        float bestProb = SoftmaxMaxProb(logits, bestIdx);
+        float bestProbOnce = SoftmaxMaxProb(logitsOnce, bestIdxOnce);
+        if (debugLogs) Debug.Log($"[SpellRaw] bestIdx={bestIdxOnce} prob={bestProbOnce:F3}");
 
-        if (debugLogs) Debug.Log($"[SpellRaw] bestIdx={bestIdx} prob={bestProb:F3}");
-
-        if (bestProb < minProb)
+        if (bestProbOnce < minProb)
         {
-            if (debugLogs) Debug.Log($"[SpellDrop] LOW_PROB {bestProb:F3} < {minProb:F3}");
+            if (debugLogs) Debug.Log($"[SpellDrop] LOW_PROB {bestProbOnce:F3} < {minProb:F3}");
             return;
         }
 
-        // 6) embedding OOD gating
         float dist = 0f;
         if (useOodGate && metaReady && embRunner != null && embRunner.IsReady)
         {
@@ -492,7 +571,7 @@ public class SignPredictionProvider : MonoBehaviour
                 return;
             }
 
-            dist = L2DistanceToCentroid(emb, bestIdx, meta);
+            dist = L2DistanceToCentroid(emb, bestIdxOnce, meta);
             float thr = (overrideDistanceThreshold > 0f) ? overrideDistanceThreshold : meta.distanceThreshold;
             if (dist > thr)
             {
@@ -501,30 +580,28 @@ public class SignPredictionProvider : MonoBehaviour
             }
         }
 
-        // 7) emit and lock
         float now = clock != null ? clock.NowSec() : Time.time;
-        string label = (metaReady && bestIdx >= 0 && bestIdx < meta.ClassCount && meta.classNames != null)
-            ? meta.classNames[bestIdx]
-            : $"#{bestIdx}";
+        string label = (metaReady && bestIdxOnce >= 0 && bestIdxOnce < meta.ClassCount && meta.classNames != null)
+            ? meta.classNames[bestIdxOnce]
+            : $"#{bestIdxOnce}";
 
-        if (debugLogs) Debug.Log($"[PredEmit-SPELL] t={now:F2} idx={bestIdx} label={label} prob={bestProb:F2} dist={dist:F2}");
+        if (debugLogs) Debug.Log($"[PredEmit-SPELL] t={now:F2} idx={bestIdxOnce} label={label} prob={bestProbOnce:F2} dist={dist:F2}");
 
         engine.PushPrediction(new Prediction
         {
             timeSec = now,
-            idx = bestIdx,
-            signId = bestIdx,
+            idx = bestIdxOnce,
+            signId = bestIdxOnce,
             label = label,
-            prob = bestProb,
-            score = bestLogit,
+            prob = bestProbOnce,
+            score = bestLogitOnce,
             dist = dist,
             locked = true
         });
 
-        // lock until hand disappears
         spellLocked = true;
-        spellLockedLabel = bestIdx;
-        lastEmitLabel = bestIdx;
+        spellLockedLabel = bestIdxOnce;
+        lastEmitLabel = bestIdxOnce;
         lastEmitTime = now;
         seq.Clear();
     }
