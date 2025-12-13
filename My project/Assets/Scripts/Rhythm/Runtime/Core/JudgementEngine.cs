@@ -64,6 +64,7 @@ public class JudgementEngine : MonoBehaviour
 
     public void UpdateEngine(float nowSec)
     {
+
         if (config == null || notes == null || _currentIndex >= notes.Count) return;
 
         _predBuf.Prune(nowSec);

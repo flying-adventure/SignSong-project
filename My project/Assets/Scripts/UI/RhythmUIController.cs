@@ -1,5 +1,6 @@
+using System.Collections;
 using UnityEngine;
-using TMPro;   // TextMeshPro 쓸 거면 필요
+using TMPro;
 
 public class RhythmUIController : MonoBehaviour
 {
@@ -12,6 +13,9 @@ public class RhythmUIController : MonoBehaviour
     [SerializeField] private GameObject goodLabel;
     [SerializeField] private GameObject missLabel;
 
+    [Header("Label Display")]
+    [SerializeField] private float labelShowSeconds = 0.25f;
+
     [Header("Text UI (optional)")]
     [SerializeField] private TextMeshProUGUI perfectCountText;
     [SerializeField] private TextMeshProUGUI goodCountText;
@@ -19,13 +23,17 @@ public class RhythmUIController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI comboText;
     [SerializeField] private TextMeshProUGUI maxComboText;
 
+    private Coroutine _hideLabelCo;
+    private Coroutine _refreshTextCo;
+
     private void Awake()
     {
-        // 인스펙터에서 안 넣어줬으면 자동으로 찾아보기
-        if (judgementEngine == null)
-            judgementEngine = FindObjectOfType<JudgementEngine>();
-        if (scoreManager == null)
-            scoreManager = FindObjectOfType<ScoreManager>();
+        if (judgementEngine == null) judgementEngine = FindObjectOfType<JudgementEngine>();
+        if (scoreManager == null)    scoreManager    = FindObjectOfType<ScoreManager>();
+
+        // 시작 시 UI 초기화
+        SetAllJudgeLabelsOff();
+        RefreshTexts();
     }
 
     private void OnEnable()
@@ -40,31 +48,84 @@ public class RhythmUIController : MonoBehaviour
             judgementEngine.OnJudged -= HandleJudged;
     }
 
-    // --------- 콜백: 매 판정마다 호출됨 ---------
     private void HandleJudged(JudgeEvent e)
     {
-        // 1) PERFECT / GOOD / MISS 라벨 ON/OFF
-        if (perfectLabel) perfectLabel.SetActive(e.result == JudgeResult.Perfect);
-        if (goodLabel)    goodLabel.SetActive(e.result == JudgeResult.Good);
-        if (missLabel)    missLabel.SetActive(e.result == JudgeResult.Miss);
+        Debug.Log($"[UI] t={Time.time:F2} Judged={e.result} noteId={e.noteId}");
+        
+        // 1) 라벨 표시 (잠깐만)
+        ShowJudgeLabel(e.result);
 
-        // 2) 점수/콤보 텍스트 갱신 (ScoreManager 값 사용)
-        if (scoreManager != null)
+        // 2) ScoreManager 값으로 텍스트 갱신
+        //    (ScoreManager가 같은 이벤트를 받아 업데이트하는 타이밍 문제 방지)
+        if (_refreshTextCo != null) StopCoroutine(_refreshTextCo);
+        _refreshTextCo = StartCoroutine(RefreshTextsNextFrame());
+    }
+
+    private void BringToFront(GameObject go)
+    {
+        if (!go) return;
+        go.transform.SetAsLastSibling(); // 같은 Canvas 내에서 최상단 렌더
+    }
+
+    private void ShowJudgeLabel(JudgeResult result)
+    {
+        SetAllJudgeLabelsOff();
+        if (result == JudgeResult.Perfect && perfectLabel)
         {
-            if (perfectCountText) perfectCountText.text = scoreManager.perfectCount.ToString();
-            if (goodCountText)    goodCountText.text    = scoreManager.goodCount.ToString();
-            if (missCountText)    missCountText.text    = scoreManager.missCount.ToString();
+            perfectLabel.SetActive(true);
+            BringToFront(perfectLabel);
+        }
+        else if (result == JudgeResult.Good && goodLabel)
+        {
+            goodLabel.SetActive(true);
+            BringToFront(goodLabel);
+        }
+        else if (result == JudgeResult.Miss && missLabel)
+        {
+            missLabel.SetActive(true);
+            BringToFront(missLabel);
+        }
 
-            if (comboText)
-            {
-                if (scoreManager.combo <= 1)
-                    comboText.text = "";   // 0~1 콤보는 숨기고 싶으면
-                else
-                    comboText.text = scoreManager.combo + " Combo";
-            }
+        if (_hideLabelCo != null) StopCoroutine(_hideLabelCo);
+        _hideLabelCo = StartCoroutine(HideLabelsAfter(labelShowSeconds));
 
-            if (maxComboText)
-                maxComboText.text = "MAX " + scoreManager.maxCombo;
+    }
+
+    private IEnumerator HideLabelsAfter(float sec)
+    {
+        yield return new WaitForSeconds(sec);
+        SetAllJudgeLabelsOff();
+    }
+
+    private void SetAllJudgeLabelsOff()
+    {
+        if (perfectLabel) perfectLabel.SetActive(false);
+        if (goodLabel)    goodLabel.SetActive(false);
+        if (missLabel)    missLabel.SetActive(false);
+    }
+
+    private IEnumerator RefreshTextsNextFrame()
+    {
+        yield return null; // 다음 프레임에 갱신 (ScoreManager 업데이트 타이밍 안전)
+        RefreshTexts();
+    }
+
+    private void RefreshTexts()
+    {
+        if (scoreManager == null) return;
+
+        if (perfectCountText) perfectCountText.text = scoreManager.perfectCount.ToString();
+        if (goodCountText)    goodCountText.text    = scoreManager.goodCount.ToString();
+        if (missCountText)    missCountText.text    = scoreManager.missCount.ToString();
+
+        if (comboText)
+        {
+            comboText.text = (scoreManager.combo <= 1) ? "" : $"{scoreManager.combo} Combo";
+        }
+
+        if (maxComboText)
+        {
+            maxComboText.text = $"MAX {scoreManager.maxCombo}";
         }
     }
 }
