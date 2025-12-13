@@ -36,7 +36,11 @@ public class SignPredictionProvider : MonoBehaviour
     public string spellMetaJsonRelPath = "SignModels/sign_meta_spell.json";
 
     [Header("Gating (Classifier)")]
-    public float minProb = 0.05f;
+    public float minProbWord = 0.03f;
+    public float minProbSpell = 0.06f;
+
+    // 현재 모드에 맞는 minProb 자동 선택
+    private float MinProb => useSpellMode ? minProbSpell : minProbWord;
 
     [Header("OOD Gating (Embedding + centroid distance)")]
     public bool useOodGate = false;
@@ -111,16 +115,47 @@ public class SignPredictionProvider : MonoBehaviour
     private bool spellLocked = false;
     private int spellLockedLabel = -1;
 
+    private bool clsReady = false;
+
+    private int wordMissingFrames = 0;
+    public int wordResetAfterMissingFrames = 10; // 약 10프레임 연속 누락되면 리셋(적당히 조절)
+
+    private void TryInitClsRunnerForCurrentMode()
+    {
+        if (clsRunner == null) clsRunner = new TFLiteGenericRunner();
+        if (embRunner == null) embRunner = new TFLiteGenericRunner(); // OOD 켤 때 필요
+
+        if (clsReady && clsRunner.IsReady) return;
+
+        var modelPath = useSpellMode ? spellClsModelRelPath : clsModelRelPath;
+        int feat = useSpellMode ? 63 : 141;
+        int outDim = useSpellMode ? 40 : 15;
+
+        clsRunner.LoadFromStreamingAssets(modelPath, threads, feat, outDim);
+        clsReady = clsRunner.IsReady;
+
+        if (debugLogs) Debug.Log($"[CLS] loaded mode={(useSpellMode ? "SPELL" : "WORD")} feat={feat} out={outDim} ready={clsReady}");
+    }
+
+    private void ResetWordBuffers()
+    {
+        // seqWord가 아직 안 만들어졌을 수 있음
+        seqWord?.Clear();
+
+        if (voteRing != null)
+        {
+            for (int i = 0; i < voteRing.Length; i++) voteRing[i] = -1;
+        }
+        votePos = 0;
+        voteCount = 0;
+    }
+
     void Awake()
     {
-        clsRunner = new TFLiteGenericRunner();
-        embRunner = new TFLiteGenericRunner();
-        
         // Word mode: 141 dims
-        seqWord = new SequenceBuffer(141);
-        
+        seqWord  = new SequenceBuffer(TFLiteGenericRunner.SeqLen, 141);
         // Spell mode: 63 dims (right-hand only)
-        seqSpell = new SequenceBuffer(63);
+        seqSpell = new SequenceBuffer(TFLiteGenericRunner.SeqLen, 63);
 
         voteRing = new int[Mathf.Max(1, votingWindow)];
         for (int i = 0; i < voteRing.Length; i++) voteRing[i] = -1;
@@ -153,7 +188,8 @@ public class SignPredictionProvider : MonoBehaviour
         var modelPath = useSpellMode ? spellClsModelRelPath : clsModelRelPath;
         int clsFeat = useSpellMode ? 63 : 141;
         int clsOut = useSpellMode ? 40 : 15; // word=15 classes, spell=40 classes
-        clsRunner.LoadFromStreamingAssets(modelPath, threads, clsFeat, clsOut);
+
+        TryInitClsRunnerForCurrentMode();
 
         // Embedding runner will be loaded after meta is available (centroid dim known)
         StartCoroutine(LoadMetaCoroutine());
@@ -306,9 +342,9 @@ public class SignPredictionProvider : MonoBehaviour
         Debug.Log($"[TEST-SPELL-Raw] idx={bestIdx} prob={bestProb:F3}");
 
         // 6) 확률 필터
-        if (bestProb < minProb)
+        if (bestProb < MinProb)
         {
-            Debug.Log($"[TEST-SPELL-DROP] LOW_PROB {bestProb:F3} < {minProb:F3}");
+            Debug.Log($"[TEST-SPELL-DROP] LOW_PROB {bestProb:F3} < {MinProb:F3}");
             seq.Clear();
             return;
         }
@@ -336,7 +372,7 @@ public class SignPredictionProvider : MonoBehaviour
             ? meta.classNames[bestIdx]
             : $"#{bestIdx}";
 
-        Debug.Log($"[TEST-SPELL-EMIT] ✅ PASS 판정 완료: idx={bestIdx} label='{label}' prob={bestProb:F2} dist={dist:F2}");
+        Debug.Log($"[TEST-SPELL-EMIT] PASS 판정 완료: idx={bestIdx} label='{label}' prob={bestProb:F2} dist={dist:F2}");
         seq.Clear();
     }
 
@@ -371,61 +407,81 @@ public class SignPredictionProvider : MonoBehaviour
         Debug.Log($"[TEST-WORD] idx={bestIdx} label='{label}' prob={bestProb:F3}");
     }
 
+    private ILandmarkSource GetSrc()
+    {
+        return (landmarkSourceBehaviour as ILandmarkSource) ?? landmarkSource;
+    }
+
+    private bool EnsureWordReady(out ILandmarkSource src, out MediaPipeLandmarkSource mp)
+    {
+        src = GetSrc();
+        mp = src as MediaPipeLandmarkSource;
+        if (src == null) return false;
+
+        // clsRunner만 보장하면 됨 (embRunner는 useOodGate일 때만)
+        if (clsRunner == null || !clsRunner.IsReady)
+            TryInitClsRunnerForCurrentMode();
+
+        if (clsRunner == null || !clsRunner.IsReady) return false;
+
+        // seqWord는 Awake에서 이미 만들고 있으니 사실상 필요 없음
+        if (seqWord == null)
+            seqWord = new SequenceBuffer(TFLiteGenericRunner.SeqLen, 141);
+
+        if (voteRing == null || voteRing.Length == 0)
+            voteRing = new int[Mathf.Max(1, votingWindow)];
+
+        return true;
+    }
+
     private void UpdateWordMode()
     {
-        // 1) 141 feature (word: left + right + face)
-        var feat = landmarkSource.GetFeature141();
-        if (feat == null || feat.Length != FeatDim) return;
+        if (!EnsureWordReady(out var src, out var mp)) return;
 
-        // 2) push sequence
-        seq.Push(feat);
-        if (!seq.IsFull) return;
+        // ✅ feature가 유효할 때만 push (손/얼굴 판단은 GetFeature141() 결과로)
+        var feat = src.GetFeature141();
 
-        // 3) classifier infer
-        var logits = clsRunner.Run(seq.Snapshot());
+        if (feat == null || feat.Length != 141)
+        {
+            wordMissingFrames++;
+
+            // 너무 오래 비면 리셋 (한두 프레임 튐은 허용)
+            if (wordMissingFrames >= wordResetAfterMissingFrames)
+            {
+                ResetWordBuffers();
+                wordMissingFrames = 0;
+            }
+
+            if (debugLogs && Time.unscaledTime >= _nextDropLogTime)
+            {
+                _nextDropLogTime = Time.unscaledTime + debugDropEverySec;
+                bool faceNow = (mp != null) ? mp.HasFaceNow : src.HasFace;
+                bool anyHandNow = (mp != null) ? (mp.HasLeftHand || mp.HasRightHand) : src.HasAnyHand;
+                Debug.Log($"[Drop-WORD] NO_FEAT141 missFrames={wordMissingFrames} faceNow={faceNow} anyHandNow={anyHandNow}");
+            }
+            return;
+        }
+
+        wordMissingFrames = 0;
+
+        seqWord.Push(feat);
+        if (!seqWord.IsFull) return;
+
+        var logits = clsRunner.Run(seqWord.Snapshot());
         if (logits == null || logits.Length == 0) return;
 
         int bestIdx = 0;
         float bestLogit = logits[0];
         for (int i = 1; i < logits.Length; i++)
-        {
             if (logits[i] > bestLogit) { bestLogit = logits[i]; bestIdx = i; }
-        }
 
         float bestProb = SoftmaxMaxProb(logits, bestIdx);
-
-        if (!landmarkSource.HasFace)
+        if (bestProb < MinProb)
         {
             if (debugLogs && Time.unscaledTime >= _nextDropLogTime)
             {
                 _nextDropLogTime = Time.unscaledTime + debugDropEverySec;
-                Debug.Log("[Drop-WORD] NO_FACE (skip)");
-            }
-            return;
-        }
-
-        if (debugLogs && Time.unscaledTime >= _nextPredLogTime)
-        {
-            _nextPredLogTime = Time.unscaledTime + debugPredEverySec;
-
-            string rawLabel =
-                (metaReady && meta.classNames != null &&
-                bestIdx >= 0 && bestIdx < meta.classNames.Length)
-                ? meta.classNames[bestIdx]
-                : $"#{bestIdx}";
-
-            float t = (clock != null) ? clock.NowSec() : 0f;
-            Debug.Log(
-                $"[PredRaw-WORD] t={t:F2} idx={bestIdx} label={rawLabel} prob={bestProb:F3}"
-            );
-        }
-
-        if (bestProb < minProb)
-        {
-            if (debugLogs && Time.unscaledTime >= _nextDropLogTime)
-            {
-                _nextDropLogTime = Time.unscaledTime + debugDropEverySec;
-                Debug.Log($"[Drop-WORD] LOW_PROB prob={bestProb:F3} < {minProb:F3} bestIdx={bestIdx}");
+                Debug.Log($"[Drop-WORD] LOW_PROB prob={bestProb:F3} < {MinProb:F3} bestIdx={bestIdx}");
             }
             return;
         }
@@ -433,42 +489,59 @@ public class SignPredictionProvider : MonoBehaviour
         ProcessPrediction(bestIdx, bestProb, bestLogit);
     }
 
+    private void ResetSpellBuffers()
+    {
+        spellLocked = false;
+        spellLockedLabel = -1;
+        decisionTimer = 0f;
+        seqSpell.Clear();
+
+        for (int i = 0; i < voteRing.Length; i++) voteRing[i] = -1;
+        votePos = 0;
+        voteCount = 0;
+    }
+
     private void UpdateSpellMode()
     {
-        // ---------------------------
-        // 0) 손이 없으면 리셋
-        // ---------------------------
-        if (!landmarkSource.HasAnyHand)
+        // 0) 단일 진실(src)
+        ILandmarkSource src =
+            (landmarkSourceBehaviour as ILandmarkSource)
+            ?? landmarkSource;
+
+        if (src == null) return;
+
+        var mp = src as MediaPipeLandmarkSource; // optional debug
+
+        // 1) 오른손 랜드마크 가져오기 (오른손만 강제)
+        var rightHand = src.GetRightHandLandmarks();
+
+        if (rightHand == null || rightHand.Length != 21)
         {
-            // 손이 사라지면 상태 초기화
-            spellLocked = false;
-            spellLockedLabel = -1;
-            decisionTimer = 0f;
-            seq.Clear();
+            ResetSpellBuffers();
 
-            // voting도 초기화(안 하면 이전 결과가 남아 오판정 가능)
-            for (int i = 0; i < voteRing.Length; i++) voteRing[i] = -1;
-            votePos = 0;
-            voteCount = 0;
+            if (debugLogs && Time.unscaledTime >= _nextDropLogTime)
+            {
+                _nextDropLogTime = Time.unscaledTime + debugDropEverySec;
 
+                if (mp != null)
+                    Debug.Log($"[SpellDrop] NO_RIGHT_HAND (LH={mp.HasLeftHand}, RH={mp.HasRightHand})");
+                else
+                    Debug.Log("[SpellDrop] NO_RIGHT_HAND");
+            }
             return;
         }
 
-        // ---------------------------
-        // 1) 오른손(혹은 feeder가 넣어준 손) 가져오기 + 정규화
-        // ---------------------------
-        var rightHand = landmarkSource.GetRightHandLandmarks();
-        if (rightHand == null || rightHand.Length != 21) return;
-
+        // 2) 정규화 → 63 feature
         var feat = RightHandNormalizer.NormalizeLandmarks(rightHand);
         if (feat == null || feat.Length != 63) return;
 
-        // (옵션) 입력이 거의 0이면 스킵 (카메라/랜드마크가 실제로 안 들어올 때 방지)
+        // (옵션) 입력이 거의 0이면 스킵 (실제로 랜드마크가 안 들어오는 상황 방지)
         if (debugLogs && Time.unscaledTime >= _nextDropLogTime)
         {
             float absMean = 0f;
             for (int i = 0; i < feat.Length; i++) absMean += Mathf.Abs(feat[i]);
             absMean /= feat.Length;
+
             if (absMean < 1e-5f)
             {
                 _nextDropLogTime = Time.unscaledTime + debugDropEverySec;
@@ -477,28 +550,22 @@ public class SignPredictionProvider : MonoBehaviour
             }
         }
 
-        // ---------------------------
-        // 2) 슬라이딩 버퍼에 push
-        // ---------------------------
-        seq.Push(feat);
+        // 3) 버퍼 push
+        seqSpell.Push(feat);
 
-        // ---------------------------
-        // 3) (A) 리듬게임용 실시간 모드: 매 프레임 추론 + ProcessPrediction() 사용
-        // ---------------------------
+        // 4-A) 리듬게임용 실시간 모드
         if (spellRealtimeForRhythm)
         {
-            int need = Mathf.Max(1, Mathf.FloorToInt(TFLiteGenericRunner.SeqLen * spellMinBufferRatio));
-            if (seq.Count < need) return;
+            int need = Mathf.Max(1, Mathf.FloorToInt(seqSpell.SeqLen * spellMinBufferRatio));
+            if (seqSpell.Count < need) return;
 
-            var logits = clsRunner.Run(seq.Snapshot());
+            var logits = clsRunner.Run(seqSpell.Snapshot());
             if (logits == null || logits.Length == 0) return;
 
             int bestIdx = 0;
             float bestLogit = logits[0];
             for (int i = 1; i < logits.Length; i++)
-            {
                 if (logits[i] > bestLogit) { bestLogit = logits[i]; bestIdx = i; }
-            }
 
             float bestProb = SoftmaxMaxProb(logits, bestIdx);
 
@@ -509,101 +576,57 @@ public class SignPredictionProvider : MonoBehaviour
                 Debug.Log($"[PredRaw-SPELL-RT] t={nowT:F2} idx={bestIdx} prob={bestProb:F3}");
             }
 
-            if (bestProb < minProb)
+            if (bestProb < MinProb)
             {
                 if (debugLogs && Time.unscaledTime >= _nextDropLogTime)
                 {
                     _nextDropLogTime = Time.unscaledTime + debugDropEverySec;
-                    Debug.Log($"[Drop-SPELL-RT] LOW_PROB prob={bestProb:F3} < {minProb:F3} bestIdx={bestIdx}");
+                    Debug.Log($"[Drop-SPELL-RT] LOW_PROB prob={bestProb:F3} < {MinProb:F3} bestIdx={bestIdx}");
                 }
                 return;
             }
 
-            // WORD 모드와 동일 파이프라인(투표/쿨다운/OOD/emit) 타게 만들기
+            // WORD와 동일 파이프라인
             ProcessPrediction(bestIdx, bestProb, bestLogit);
             return;
         }
 
-        // ---------------------------
-        // 3) (B) 기존 3초 단발 + lock 모드(필요하면 유지)
-        // ---------------------------
-
-        // if already locked, do nothing (hold the accepted result)
+        // 4-B) 기존 3초 단발 + lock 모드 유지 (필요 시)
         if (spellLocked) return;
 
         decisionTimer += Time.deltaTime;
         if (decisionTimer < decisionIntervalSec) return;
         decisionTimer = 0f;
 
-        // 최소 버퍼 확인
-        if (seq.Count < (TFLiteGenericRunner.SeqLen / 2))
+        if (seqSpell.Count < (seqSpell.SeqLen / 2))
         {
-            if (debugLogs) Debug.Log($"[Spell] 버퍼 부족: {seq.Count}/{TFLiteGenericRunner.SeqLen}");
+            if (debugLogs) Debug.Log($"[Spell] 버퍼 부족: {seqSpell.Count}/{seqSpell.SeqLen}");
             return;
         }
 
-        var logitsOnce = clsRunner.Run(seq.Snapshot());
+        var logitsOnce = clsRunner.Run(seqSpell.Snapshot());
         if (logitsOnce == null || logitsOnce.Length == 0) return;
 
         int bestIdxOnce = 0;
         float bestLogitOnce = logitsOnce[0];
         for (int i = 1; i < logitsOnce.Length; i++)
-        {
             if (logitsOnce[i] > bestLogitOnce) { bestLogitOnce = logitsOnce[i]; bestIdxOnce = i; }
-        }
 
         float bestProbOnce = SoftmaxMaxProb(logitsOnce, bestIdxOnce);
         if (debugLogs) Debug.Log($"[SpellRaw] bestIdx={bestIdxOnce} prob={bestProbOnce:F3}");
 
-        if (bestProbOnce < minProb)
+        if (bestProbOnce < MinProb)
         {
-            if (debugLogs) Debug.Log($"[SpellDrop] LOW_PROB {bestProbOnce:F3} < {minProb:F3}");
+            if (debugLogs) Debug.Log($"[SpellDrop] LOW_PROB {bestProbOnce:F3} < {MinProb:F3}");
             return;
         }
 
-        float dist = 0f;
-        if (useOodGate && metaReady && embRunner != null && embRunner.IsReady)
-        {
-            var emb = embRunner.Run(seq.Snapshot());
-            if (emb == null || emb.Length != meta.centroidDim)
-            {
-                if (debugLogs) Debug.LogWarning("[Spell] embedding output invalid");
-                return;
-            }
-
-            dist = L2DistanceToCentroid(emb, bestIdxOnce, meta);
-            float thr = (overrideDistanceThreshold > 0f) ? overrideDistanceThreshold : meta.distanceThreshold;
-            if (dist > thr)
-            {
-                if (debugLogs) Debug.Log($"[SpellDrop] OOD dist={dist:F3} > thr={thr:F3}");
-                return;
-            }
-        }
-
-        float now = clock != null ? clock.NowSec() : Time.time;
-        string label = (metaReady && bestIdxOnce >= 0 && bestIdxOnce < meta.ClassCount && meta.classNames != null)
-            ? meta.classNames[bestIdxOnce]
-            : $"#{bestIdxOnce}";
-
-        if (debugLogs) Debug.Log($"[PredEmit-SPELL] t={now:F2} idx={bestIdxOnce} label={label} prob={bestProbOnce:F2} dist={dist:F2}");
-
-        engine.PushPrediction(new Prediction
-        {
-            timeSec = now,
-            idx = bestIdxOnce,
-            signId = bestIdxOnce,
-            label = label,
-            prob = bestProbOnce,
-            score = bestLogitOnce,
-            dist = dist,
-            locked = true
-        });
+        // OOD/emit은 네 기존 로직 그대로 (ProcessPrediction으로 보내도 되고, 지금처럼 별도 emit도 OK)
+        ProcessPrediction(bestIdxOnce, bestProbOnce, bestLogitOnce);
 
         spellLocked = true;
         spellLockedLabel = bestIdxOnce;
-        lastEmitLabel = bestIdxOnce;
-        lastEmitTime = now;
-        seq.Clear();
+        seqSpell.Clear();
     }
 
     private void ProcessPrediction(int bestIdx, float bestProb, float bestLogit)
@@ -622,28 +645,35 @@ public class SignPredictionProvider : MonoBehaviour
             }
             else
             {
-                var emb = embRunner.Run(seq.Snapshot());
-                if (emb == null || emb.Length != meta.centroidDim)
+                if (oodEnabled && embRunner != null && embRunner.IsReady)
                 {
-                    locked = true;
-                }
-                else
-                {
-                    dist = L2DistanceToCentroid(emb, bestIdx, meta);
-                    float thr = (overrideDistanceThreshold > 0f) ? overrideDistanceThreshold : meta.distanceThreshold;
-
-                    // dist gate: 멀면 reject
-                    if (dist > thr)
+                    var emb = embRunner.Run(seq.Snapshot());
+                    if (emb == null || emb.Length != meta.centroidDim)
                     {
-                        if (debugLogs && Time.unscaledTime >= _nextDropLogTime)
-                        {
-                            _nextDropLogTime = Time.unscaledTime + 1.0f;
-                            Debug.Log($"[Drop] OOD dist={dist:F2} > thr={thr:F2}");
-                        }
-                        return;
+                        locked = true;
                     }
+                    else
+                    {
+                        dist = L2DistanceToCentroid(emb, bestIdx, meta);
+                        float thr = (overrideDistanceThreshold > 0f) ? overrideDistanceThreshold : meta.distanceThreshold;
 
-                    locked = true; // dist 통과했으면 "확신" 플래그로 써도 됨
+                        // dist gate: 멀면 reject
+                        if (dist > thr)
+                        {
+                            if (debugLogs && Time.unscaledTime >= _nextDropLogTime)
+                            {
+                                _nextDropLogTime = Time.unscaledTime + 1.0f;
+                                Debug.Log($"[Drop] OOD dist={dist:F2} > thr={thr:F2}");
+                            }
+                            return;
+                        }
+
+                        locked = true; // dist 통과했으면 "확신" 플래그로 써도 됨
+                    }
+                }
+                else if (oodEnabled)
+                {
+                    oodEnabled = false;
                 }
             }
         }

@@ -27,15 +27,18 @@ public class MediaPipeResultFeeder : MonoBehaviour
     // =========================================================
     public void Feed(HandTasks.HandLandmarkerResult result)
     {
+        Debug.Log("[HandFeeder] Feed() called");
         if (target == null) target = GetComponent<MediaPipeLandmarkSource>();
         if (target == null) return;
 
         var t = result.GetType();
 
-        if (debugLog && !_printedHandMembers)
+        // if (debugLog && !_printedHandMembers)
         {
-            foreach (var f in t.GetFields()) Debug.Log($"[HandResultField] {f.Name} / {f.FieldType}");
-            foreach (var p in t.GetProperties()) Debug.Log($"[HandResultProp] {p.Name} / {p.PropertyType}");
+            foreach (var f in t.GetFields()) 
+                Debug.Log($"[HandResultField] {f.Name} / {f.FieldType}");
+            foreach (var p in t.GetProperties()) 
+                Debug.Log($"[HandResultProp] {p.Name} / {p.PropertyType}");
             _printedHandMembers = true;
         }
 
@@ -62,7 +65,6 @@ public class MediaPipeResultFeeder : MonoBehaviour
             }
             else
             {
-                // 유지: 손 값 갱신 안 함
                 target.SetFromMediaPipe(null, null, null, null);
             }
             return;
@@ -117,6 +119,16 @@ public class MediaPipeResultFeeder : MonoBehaviour
         }
 
         target.SetFromMediaPipe(null, leftHand, rightHand, null);
+
+        if (rightHand != null && rightHand.Landmark != null && rightHand.Landmark.Count > 0)
+        {
+            var w = rightHand.Landmark[0];
+            Debug.Log($"[HandFeeder] RIGHT wrist: {w.X:F3}, {w.Y:F3}, {w.Z:F3}  cnt={rightHand.Landmark.Count}");
+        }
+        else
+        {
+            Debug.Log("[HandFeeder] RIGHT hand is null/empty");
+        }
 
         if (debugLog)
             Debug.Log($"[HandFeeder] hands={handList.Count}");
@@ -181,6 +193,21 @@ public class MediaPipeResultFeeder : MonoBehaviour
     {
         if (target == null) target = GetComponent<MediaPipeLandmarkSource>();
         if (target == null) return;
+
+        if (clearHandsWhenMissing)
+        {
+            if (leftHand == null)  leftHand  = new Mp.NormalizedLandmarkList();
+            if (rightHand == null) rightHand = new Mp.NormalizedLandmarkList();
+        }
+        if (clearFaceWhenMissing && face == null)
+        {
+            face = new Mp.NormalizedLandmarkList();
+        }
+
+        int lh = (leftHand  != null && leftHand.Landmark  != null) ? leftHand.Landmark.Count  : 0;
+        int rh = (rightHand != null && rightHand.Landmark != null) ? rightHand.Landmark.Count : 0;
+        Debug.Log($"[Feeder-Proto] LH={lh} RH={rh} face={(face!=null)}");
+        Debug.Log($"[FeederTarget] target={(target!=null ? target.GetInstanceID().ToString() : "null")}");
 
         target.SetFromMediaPipe(pose, leftHand, rightHand, face);
     }

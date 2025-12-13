@@ -1162,6 +1162,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   flipX: 0
+  spellMirrorX: 0
+  spellFallbackToLeft: 1
   feature141Mode: 0
   debugLog: 0
   logEveryNFrames: 30
@@ -2334,7 +2336,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7437913218988819921, guid: 57b03c00b2e57ac46a6a4bf294b941f3, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 220
+      value: 190
       objectReference: {fileID: 0}
     - target: {fileID: 7437913218988819921, guid: 57b03c00b2e57ac46a6a4bf294b941f3, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2366,7 +2368,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7437913218988819921, guid: 57b03c00b2e57ac46a6a4bf294b941f3, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 204
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7437913218988819921, guid: 57b03c00b2e57ac46a6a4bf294b941f3, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -2631,6 +2633,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   flipX: 0
+  spellMirrorX: 0
+  spellFallbackToLeft: 1
   feature141Mode: 0
   debugLog: 0
   logEveryNFrames: 30
@@ -3447,13 +3451,41 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5150148826075456888, guid: 312bcca9ed094b24b87856e6c9b01591, type: 3}
+      propertyPath: flipX
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5150148826075456888, guid: 312bcca9ed094b24b87856e6c9b01591, type: 3}
+      propertyPath: debugLog
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5150148826075456888, guid: 312bcca9ed094b24b87856e6c9b01591, type: 3}
+      propertyPath: spellMirrorX
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5150148826075456888, guid: 312bcca9ed094b24b87856e6c9b01591, type: 3}
+      propertyPath: spellFallbackToLeft
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5435763023136103110, guid: 312bcca9ed094b24b87856e6c9b01591, type: 3}
       propertyPath: m_Name
       value: RhythmSystem
       objectReference: {fileID: 0}
     - target: {fileID: 5664565738489341259, guid: 312bcca9ed094b24b87856e6c9b01591, type: 3}
+      propertyPath: minProb
+      value: 0.06
+      objectReference: {fileID: 0}
+    - target: {fileID: 5664565738489341259, guid: 312bcca9ed094b24b87856e6c9b01591, type: 3}
+      propertyPath: votingWindow
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5664565738489341259, guid: 312bcca9ed094b24b87856e6c9b01591, type: 3}
       propertyPath: emitCooldownSec
       value: 0.08
+      objectReference: {fileID: 0}
+    - target: {fileID: 5664565738489341259, guid: 312bcca9ed094b24b87856e6c9b01591, type: 3}
+      propertyPath: spellMinBufferRatio
+      value: 0.3
       objectReference: {fileID: 0}
     - target: {fileID: 8456839659667036895, guid: 312bcca9ed094b24b87856e6c9b01591, type: 3}
       propertyPath: screen
@@ -3463,6 +3495,10 @@ PrefabInstance:
       propertyPath: _handLandmarkerResultAnnotationController
       value: 
       objectReference: {fileID: 1565903299}
+    - target: {fileID: 8672749929119377941, guid: 312bcca9ed094b24b87856e6c9b01591, type: 3}
+      propertyPath: clearHandsWhenMissing
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8695322319297265671, guid: 312bcca9ed094b24b87856e6c9b01591, type: 3}
       propertyPath: m_Enabled
       value: 0
