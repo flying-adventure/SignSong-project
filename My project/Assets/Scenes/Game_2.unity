@@ -1191,6 +1191,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 359029548}
     - target: {fileID: 1268724621636245939, guid: 4f196e365137052408e9a650a71159f1, type: 3}
+      propertyPath: swapHandednessLR
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1268724621636245939, guid: 4f196e365137052408e9a650a71159f1, type: 3}
       propertyPath: annotationController
       value: 
       objectReference: {fileID: 359029547}
@@ -1198,6 +1202,26 @@ PrefabInstance:
       propertyPath: _handLandmarkerResultAnnotationController
       value: 
       objectReference: {fileID: 359029547}
+    - target: {fileID: 2061554148263618937, guid: 4f196e365137052408e9a650a71159f1, type: 3}
+      propertyPath: clearFaceWhenMissing
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2061554148263618937, guid: 4f196e365137052408e9a650a71159f1, type: 3}
+      propertyPath: clearHandsWhenMissing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2575726510956045844, guid: 4f196e365137052408e9a650a71159f1, type: 3}
+      propertyPath: debugLog
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2575726510956045844, guid: 4f196e365137052408e9a650a71159f1, type: 3}
+      propertyPath: feature141Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2575726510956045844, guid: 4f196e365137052408e9a650a71159f1, type: 3}
+      propertyPath: spellFallbackToLeft
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3040904180551271576, guid: 4f196e365137052408e9a650a71159f1, type: 3}
       propertyPath: m_Volume
       value: 0
@@ -1220,19 +1244,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3052107980385904167, guid: 4f196e365137052408e9a650a71159f1, type: 3}
       propertyPath: emitCooldownSec
-      value: 0
+      value: 0.15
       objectReference: {fileID: 0}
     - target: {fileID: 3434105921560844714, guid: 4f196e365137052408e9a650a71159f1, type: 3}
       propertyPath: m_Name
       value: RhythmSystem
       objectReference: {fileID: 0}
     - target: {fileID: 3802280136415710503, guid: 4f196e365137052408e9a650a71159f1, type: 3}
+      propertyPath: debugLogs
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3802280136415710503, guid: 4f196e365137052408e9a650a71159f1, type: 3}
       propertyPath: chartOffsetSec
-      value: -1.57
+      value: -1.44
       objectReference: {fileID: 0}
     - target: {fileID: 3802280136415710503, guid: 4f196e365137052408e9a650a71159f1, type: 3}
       propertyPath: modelLatencySec
-      value: 2
+      value: 1.35
       objectReference: {fileID: 0}
     - target: {fileID: 3802280136415710503, guid: 4f196e365137052408e9a650a71159f1, type: 3}
       propertyPath: expectedIdxOffset
@@ -1240,7 +1268,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3949212543904867774, guid: 4f196e365137052408e9a650a71159f1, type: 3}
       propertyPath: globalOffsetSec
-      value: 0
+      value: -0.6
       objectReference: {fileID: 0}
     - target: {fileID: 4210704477004496124, guid: 4f196e365137052408e9a650a71159f1, type: 3}
       propertyPath: feeder
@@ -1250,6 +1278,10 @@ PrefabInstance:
       propertyPath: screen
       value: 
       objectReference: {fileID: 359029548}
+    - target: {fileID: 4210704477004496124, guid: 4f196e365137052408e9a650a71159f1, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4210704477004496124, guid: 4f196e365137052408e9a650a71159f1, type: 3}
       propertyPath: annotationController
       value: 
@@ -1306,8 +1338,7 @@ PrefabInstance:
       propertyPath: annotation
       value: 
       objectReference: {fileID: 359029546}
-    m_RemovedComponents:
-    - {fileID: 7897641345430226089, guid: 4f196e365137052408e9a650a71159f1, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

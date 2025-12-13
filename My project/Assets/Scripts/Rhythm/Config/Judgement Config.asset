@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Judgement Config
   m_EditorClassIdentifier: Assembly-CSharp::JudgementConfig
   perfectWindow: 0.4
-  goodWindow: 0.8
+  goodWindow: 0.9
   minProb: 0.05
   maxDist: 999
   sameSignCooldown: 0.1

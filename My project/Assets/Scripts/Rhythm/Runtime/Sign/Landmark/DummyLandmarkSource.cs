@@ -44,4 +44,16 @@ public class DummyLandmarkSource : MonoBehaviour, ILandmarkSource
 
         return true;
     }
+
+    // 지화 모델용: 오른손 21개 포인트만 반환
+    public Vector3[] GetRightHandLandmarks()
+    {
+        if (!enableDummy) return new Vector3[21];
+
+        var right21 = new Vector3[21];
+        for (int i = 0; i < 21; i++)
+            right21[i] = new Vector3(0.7f, 0.4f, 0);
+
+        return right21;
+    }
 }

@@ -7,7 +7,7 @@ public class JudgementEngine : MonoBehaviour
     [SerializeField] private JudgementConfig config;
     [SerializeField] private List<Note> notes = new(); // timeSec 오름차순 정렬
     [Header("Timing")]
-    [SerializeField] private float chartOffsetSec = 0f;     // CSV(차트) 기준 보정(오디오 앞 무음 등)
+    [SerializeField] private float chartOffsetSec = -0.6f;     // CSV(차트) 기준 보정(오디오 앞 무음 등)
     [SerializeField] private float modelLatencySec = 0f;    // 모델/추론 파이프라인 지연
     [SerializeField] private int expectedIdxOffset = 0;
 
@@ -64,6 +64,7 @@ public class JudgementEngine : MonoBehaviour
 
     public void UpdateEngine(float nowSec)
     {
+
         if (config == null || notes == null || _currentIndex >= notes.Count) return;
 
         _predBuf.Prune(nowSec);
@@ -83,7 +84,7 @@ public class JudgementEngine : MonoBehaviour
             if (nowSec > t0 + config.goodWindow)
             {
                 if (debugLogs)
-                    Debug.Log($"[MISS] noteId={note.noteId} expectedIdx={note.expectedIdx} t0={t0Raw:F2}(+{modelLatencySec:F2}=>{t0:F2}) now={nowSec:F2}");
+                    Debug.Log($"[MISS] noteId={note.noteId} expectedIdx={note.expectedIdx} t0={t0Raw:F2}(+{modelLatencySec:F2}+{chartOffsetSec:F2}=>{t0:F2}) now={nowSec:F2}");
 
                 Emit(note, nowSec, -1, nowSec, 0f, 999f, nowSec - t0, JudgeResult.Miss);
                 note.judged = true;
@@ -102,7 +103,7 @@ public class JudgementEngine : MonoBehaviour
 
             float dtAbs = Mathf.Abs(best.timeSec - t0);
             var result = (dtAbs <= config.perfectWindow) ? JudgeResult.Perfect : JudgeResult.Good;
-
+            
             Emit(note, nowSec, best.idx, best.timeSec, best.prob, best.dist, best.timeSec - t0, result);
             note.judged = true;
             _currentIndex++;
@@ -112,17 +113,19 @@ public class JudgementEngine : MonoBehaviour
     private bool TryPickBest(Note note, float t0, out Prediction best)
     {
         best = default;
-        float bestScore = float.NegativeInfinity;
+
+        float bestDt = float.PositiveInfinity;
+        float bestProb = float.NegativeInfinity;
+
+        int expected = note.expectedIdx + expectedIdxOffset;
 
         for (int i = 0; i < _candidates.Count; i++)
         {
             var p = _candidates[i];
 
-            // 같은 idx 중복 방지
+            // 같은 idx 중복 방지 (튜닝 중엔 이 조건이 문제를 만들 수 있음)
             if (p.idx == _lastIdx && (p.timeSec - _lastIdxTime) < config.sameSignCooldown)
                 continue;
-
-            int expected = note.expectedIdx + expectedIdxOffset;
 
             // 정답 idx 일치하는 경우에만 판정하도록
             if (p.idx != expected)
@@ -148,25 +151,20 @@ public class JudgementEngine : MonoBehaviour
             if (p.prob < config.minProb) continue;
             if (p.dist > config.maxDist) continue;
 
-            // 점수 구성 요소 계산(먼저 선언!)
             float dt = Mathf.Abs(p.timeSec - t0);
-            float timeScore = Mathf.Exp(-dt / 0.08f);
-            float distScore = 1f / (1f + p.dist);
 
-            // locked 완화: locked면 가점, 아니면 감점
-            float lockBonus = p.locked ? 0.15f : -0.15f;
-
-            // score는 딱 한 번만 선언
-            float score = lockBonus + 0.55f * p.prob + 0.25f * timeScore + 0.20f * distScore;
-
-            if (score > bestScore)
+            // 1) 시간 차(|dt|)가 최우선
+            // 2) 거의 같으면(prob가 더 큰 것)
+            const float eps = 1e-4f;
+            if (dt < bestDt - eps || (Mathf.Abs(dt - bestDt) <= eps && p.prob > bestProb))
             {
-                bestScore = score;
+                bestDt = dt;
+                bestProb = p.prob;
                 best = p;
             }
         }
 
-        if (bestScore == float.NegativeInfinity) return false;
+        if (bestDt == float.PositiveInfinity) return false;
 
         _lastIdx = best.idx;
         _lastIdxTime = best.timeSec;
@@ -176,6 +174,12 @@ public class JudgementEngine : MonoBehaviour
     private void Emit(Note note, float nowSec, int predictedIdx, float hitTime,
                       float prob, float dist, float dt, JudgeResult result)
     {
+        if (debugLogs && result != JudgeResult.Miss)
+        {
+            float t0 = note.timeSec + chartOffsetSec + modelLatencySec;
+            Debug.Log($"[HIT] noteId={note.noteId} noteTime={note.timeSec:F2} t0={t0:F2} hitTime={hitTime:F2} dt={dt:F3} result={result}");
+        }
+
         OnJudged?.Invoke(new JudgeEvent
         {
             noteId = note.noteId,

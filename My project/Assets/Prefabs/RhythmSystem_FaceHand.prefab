@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 5098628710721237055}
   - component: {fileID: 8051107826055807756}
   - component: {fileID: 962191259838680582}
-  - component: {fileID: 7897641345430226089}
   - component: {fileID: 1392855253082901931}
   - component: {fileID: 3052107980385904167}
   - component: {fileID: 2575726510956045844}
@@ -24,7 +23,7 @@ GameObject:
   - component: {fileID: 4210704477004496124}
   - component: {fileID: 6304156483739214262}
   m_Layer: 0
-  m_Name: RhythmSystem
+  m_Name: RhythmSystem_FaceHand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -155,6 +154,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioClock
   audioSource: {fileID: 3040904180551271576}
+  globalOffsetSec: 0
 --- !u!114 &3802280136415710503
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -181,6 +181,9 @@ MonoBehaviour:
     timeSec: 3
     expectedIdx: 0
     expectedLabel: "\"\uC0AC\uB791\""
+  chartOffsetSec: -0.6
+  modelLatencySec: 0
+  expectedIdxOffset: 0
   debugMeta:
     classNames: []
     distanceThreshold: 0
@@ -232,19 +235,6 @@ MonoBehaviour:
   idxColumn: model_class_idx
   labelColumn: keyword
   fallbackLabelColumn: keyword
---- !u!114 &7897641345430226089
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3434105921560844714}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cbbdb4201eb83f34482d62a5c0d79260, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DummyLandmarkSource
-  enableDummy: 1
 --- !u!114 &1392855253082901931
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -270,11 +260,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e69c7fed8740d5643a0fd834e281f5ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SignPredictionProvider
+  useSpellMode: 0
+  autoDetectModeFromScene: 1
   clsModelRelPath: SignModels/best_cnn_gru2_model_word_split.tflite
+  spellClsModelRelPath: SignModels/best_cnn_gru_model_unity_spell.tflite
   embModelRelPath: SignModels/embedding_model_word_split.tflite
+  spellEmbModelRelPath: SignModels/embedding_model_unity_spell.tflite
   threads: 2
   metaJsonRelPath: SignModels/sign_meta.json
-  minProb: 0.05
+  spellMetaJsonRelPath: SignModels/sign_meta_spell.json
+  minProbWord: 0.03
+  minProbSpell: 0.06
   useOodGate: 0
   overrideDistanceThreshold: -1
   votingWindow: 3
@@ -286,6 +282,10 @@ MonoBehaviour:
   debugLogs: 1
   debugDropEverySec: 1
   debugPredEverySec: 0.5
+  useTestMode: 0
+  decisionIntervalSec: 3
+  spellRealtimeForRhythm: 1
+  spellMinBufferRatio: 0.5
 --- !u!114 &2575726510956045844
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -298,8 +298,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae71dd5c18790ea44a0f1988bb60c7c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MediaPipeLandmarkSource
-  pose5Indices: 0b0000000c0000000d0000000e00000000000000
   flipX: 0
+  spellMirrorX: 0
+  spellFallbackToLeft: 1
+  feature141Mode: 1
+  debugLog: 0
+  logEveryNFrames: 30
 --- !u!114 &2061554148263618937
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -313,6 +317,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MediaPipeResultFeeder
   target: {fileID: 2575726510956045844}
+  clearHandsWhenMissing: 1
+  clearFaceWhenMissing: 0
+  debugLog: 0
 --- !u!114 &1268724621636245939
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -329,6 +336,9 @@ MonoBehaviour:
   screen: {fileID: 0}
   runningMode: 0
   _handLandmarkerResultAnnotationController: {fileID: 0}
+  feeder: {fileID: 0}
+  swapHandednessLR: 1
+  debugHandedness: 1
 --- !u!114 &4210704477004496124
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -345,6 +355,7 @@ MonoBehaviour:
   screen: {fileID: 0}
   runningMode: 0
   _faceLandmarkerResultAnnotationController: {fileID: 6304156483739214262}
+  feeder: {fileID: 0}
 --- !u!114 &6304156483739214262
 MonoBehaviour:
   m_ObjectHideFlags: 0

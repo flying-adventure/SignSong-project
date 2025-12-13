@@ -14,6 +14,10 @@ public class NoteLoader : MonoBehaviour
     public string labelColumn = "keyword";
     public string fallbackLabelColumn = "keyword";
 
+    [Header("Timing Fix (Optional)")]
+    [SerializeField] private bool normalizeStartToZero = false; // Game_1에서만 ON
+    [SerializeField] private float extraTimeShiftSec = 0f;       // 필요하면 미세조정
+
     public List<Note> LoadNotes()
     {
         var ta = Resources.Load<TextAsset>(resourcePath);
@@ -84,7 +88,21 @@ public class NoteLoader : MonoBehaviour
         }
 
         notes.Sort((a, b) => a.timeSec.CompareTo(b.timeSec));
-        Debug.Log($"[NoteLoader] Loaded notes: {notes.Count}");
+        
+        if (normalizeStartToZero && notes.Count > 0)
+        {
+            float baseT = notes[0].timeSec; // 예: 16.35
+            for (int i = 0; i < notes.Count; i++)
+                notes[i].timeSec = Mathf.Max(0f, notes[i].timeSec - baseT);
+        }
+
+        if (Mathf.Abs(extraTimeShiftSec) > 1e-6f)
+        {
+            for (int i = 0; i < notes.Count; i++)
+                notes[i].timeSec = Mathf.Max(0f, notes[i].timeSec + extraTimeShiftSec);
+        }
+
+        Debug.Log($"[Chart] firstNoteTime={notes[0].timeSec:F2}, count={notes.Count}");
         return notes;
     }
 

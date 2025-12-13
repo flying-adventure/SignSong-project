@@ -6,17 +6,20 @@ using Mp = Mediapipe;
 using HandTasks = Mediapipe.Tasks.Vision.HandLandmarker;
 using FaceTasks = Mediapipe.Tasks.Vision.FaceLandmarker;
 
-/// <summary>
-/// MediaPipe(Hands/Face/Holistic 등)에서 뽑은 landmark를
-/// MediaPipeLandmarkSource로 "주입"해주는 브릿지.
-/// </summary>
 public class MediaPipeResultFeeder : MonoBehaviour
 {
     [Header("Target")]
     public MediaPipeLandmarkSource target;
 
+    [Header("When landmarks missing")]
+    public bool clearHandsWhenMissing = true;
+    public bool clearFaceWhenMissing = false;
+
+    [Header("Debug")]
+    public bool debugLog = false;
+
     private bool _printedHandMembers = false;
-    private bool _loggedHandError = false;
+    private bool _loggedHandEmptyOnce = false;
     private bool _printedFaceMembers = false;
 
     // =========================================================
@@ -24,22 +27,21 @@ public class MediaPipeResultFeeder : MonoBehaviour
     // =========================================================
     public void Feed(HandTasks.HandLandmarkerResult result)
     {
+        Debug.Log("[HandFeeder] Feed() called");
         if (target == null) target = GetComponent<MediaPipeLandmarkSource>();
-        if (target == null) return;   // result는 struct라 null 비교 X
+        if (target == null) return;
 
         var t = result.GetType();
 
-        // 한 번만 멤버 구조 찍어두기
-        if (!_printedHandMembers)
+        // if (debugLog && !_printedHandMembers)
         {
-            foreach (var f in t.GetFields())
+            foreach (var f in t.GetFields()) 
                 Debug.Log($"[HandResultField] {f.Name} / {f.FieldType}");
-            foreach (var p in t.GetProperties())
+            foreach (var p in t.GetProperties()) 
                 Debug.Log($"[HandResultProp] {p.Name} / {p.PropertyType}");
             _printedHandMembers = true;
         }
 
-        // handLandmarks : IList<...>
         object handVal =
               t.GetProperty("HandLandmarks")?.GetValue(result)
            ?? t.GetProperty("handLandmarks")?.GetValue(result)
@@ -50,15 +52,21 @@ public class MediaPipeResultFeeder : MonoBehaviour
 
         if (handList == null || handList.Count == 0)
         {
-            if (!_loggedHandError)
+            if (debugLog && !_loggedHandEmptyOnce)
             {
-                Debug.Log("[HandFeeder] handLandmarks not found or empty; clearing.");
-                _loggedHandError = true;
+                Debug.Log("[HandFeeder] handLandmarks empty.");
+                _loggedHandEmptyOnce = true;
             }
-            var empty = new Mp.NormalizedLandmarkList();
-            target.SetFromMediaPipe(null, empty, empty, null);
 
-            Debug.Log("hands: 0");
+            if (clearHandsWhenMissing)
+            {
+                var empty = new Mp.NormalizedLandmarkList();
+                target.SetFromMediaPipe(null, empty, empty, null);
+            }
+            else
+            {
+                target.SetFromMediaPipe(null, null, null, null);
+            }
             return;
         }
 
@@ -78,7 +86,6 @@ public class MediaPipeResultFeeder : MonoBehaviour
         {
             bool isLeft = false;
 
-            // handedness[i].categories[0].categoryName / displayName 로 왼손/오른손 구분
             if (handedList != null && i < handedList.Count && handedList[i] != null)
             {
                 var h = handedList[i];
@@ -92,17 +99,13 @@ public class MediaPipeResultFeeder : MonoBehaviour
                 {
                     foreach (var c in catsEnum)
                     {
-                        string label = SafeGetStringProp(
-                            c,
-                            "categoryName", "CategoryName",
-                            "displayName", "DisplayName"
-                        );
+                        string label = SafeGetStringProp(c, "categoryName", "CategoryName", "displayName", "DisplayName");
                         if (!string.IsNullOrEmpty(label) &&
                             string.Equals(label, "Left", StringComparison.OrdinalIgnoreCase))
                         {
                             isLeft = true;
                         }
-                        break; // 첫 카테고리만 사용
+                        break;
                     }
                 }
             }
@@ -112,17 +115,23 @@ public class MediaPipeResultFeeder : MonoBehaviour
             var proto = ToProtoList(pts);
 
             if (isLeft) leftHand = proto;
-            else        rightHand = proto;
-        }
-
-        if (leftHand != null && leftHand.Landmark.Count > 0)
-        {
-            var w = leftHand.Landmark[0];
-            Debug.Log($"Left wrist: {w.X:F3}, {w.Y:F3}, {w.Z:F3}");
+            else rightHand = proto;
         }
 
         target.SetFromMediaPipe(null, leftHand, rightHand, null);
-        Debug.Log($"hands: {handList.Count}");
+
+        if (rightHand != null && rightHand.Landmark != null && rightHand.Landmark.Count > 0)
+        {
+            var w = rightHand.Landmark[0];
+            Debug.Log($"[HandFeeder] RIGHT wrist: {w.X:F3}, {w.Y:F3}, {w.Z:F3}  cnt={rightHand.Landmark.Count}");
+        }
+        else
+        {
+            Debug.Log("[HandFeeder] RIGHT hand is null/empty");
+        }
+
+        if (debugLog)
+            Debug.Log($"[HandFeeder] hands={handList.Count}");
     }
 
     // =========================================================
@@ -135,12 +144,10 @@ public class MediaPipeResultFeeder : MonoBehaviour
 
         var t = result.GetType();
 
-        if (!_printedFaceMembers)
+        if (debugLog && !_printedFaceMembers)
         {
-            foreach (var f in t.GetFields())
-                Debug.Log($"[FaceResultField] {f.Name} / {f.FieldType}");
-            foreach (var p in t.GetProperties())
-                Debug.Log($"[FaceResultProp] {p.Name} / {p.PropertyType}");
+            foreach (var f in t.GetFields()) Debug.Log($"[FaceResultField] {f.Name} / {f.FieldType}");
+            foreach (var p in t.GetProperties()) Debug.Log($"[FaceResultProp] {p.Name} / {p.PropertyType}");
             _printedFaceMembers = true;
         }
 
@@ -158,14 +165,25 @@ public class MediaPipeResultFeeder : MonoBehaviour
         {
             var pts = ExtractLandmarksXYZ(faceList[0]);
             face = ToProtoList(pts);
+            target.SetFromMediaPipe(null, null, null, face);
         }
-
-        // pose/hand 유지, face만 갱신
-        target.SetFromMediaPipe(null, null, null, face);
+        else
+        {
+            if (clearFaceWhenMissing)
+            {
+                var empty = new Mp.NormalizedLandmarkList();
+                target.SetFromMediaPipe(null, null, null, empty); // 명시적 clear
+            }
+            else
+            {
+                // 유지: lastFace5 캐시를 계속 쓰고 싶으면 갱신하지 않음
+                target.SetFromMediaPipe(null, null, null, null);
+            }
+        }
     }
 
     // =========================================================
-    // 3) (옛 코드 호환용) proto 기반 Feed 오버로드
+    // 3) proto 기반 Feed 오버로드
     // =========================================================
     public void Feed(
         Mp.NormalizedLandmarkList pose,
@@ -175,6 +193,21 @@ public class MediaPipeResultFeeder : MonoBehaviour
     {
         if (target == null) target = GetComponent<MediaPipeLandmarkSource>();
         if (target == null) return;
+
+        if (clearHandsWhenMissing)
+        {
+            if (leftHand == null)  leftHand  = new Mp.NormalizedLandmarkList();
+            if (rightHand == null) rightHand = new Mp.NormalizedLandmarkList();
+        }
+        if (clearFaceWhenMissing && face == null)
+        {
+            face = new Mp.NormalizedLandmarkList();
+        }
+
+        int lh = (leftHand  != null && leftHand.Landmark  != null) ? leftHand.Landmark.Count  : 0;
+        int rh = (rightHand != null && rightHand.Landmark != null) ? rightHand.Landmark.Count : 0;
+        Debug.Log($"[Feeder-Proto] LH={lh} RH={rh} face={(face!=null)}");
+        Debug.Log($"[FeederTarget] target={(target!=null ? target.GetInstanceID().ToString() : "null")}");
 
         target.SetFromMediaPipe(pose, leftHand, rightHand, face);
     }
@@ -192,7 +225,6 @@ public class MediaPipeResultFeeder : MonoBehaviour
     // Helpers
     // =========================================================
 
-    // hand/face 컨테이너에서 (x,y,z) 리스트 뽑기
     private static List<(float x, float y, float z)> ExtractLandmarksXYZ(object container)
     {
         var list = new List<(float, float, float)>();
@@ -219,23 +251,16 @@ public class MediaPipeResultFeeder : MonoBehaviour
         return list;
     }
 
-    // (x,y,z) 리스트 → Mp.NormalizedLandmarkList 로 변환
     private static Mp.NormalizedLandmarkList ToProtoList(List<(float x, float y, float z)> src)
     {
         var dst = new Mp.NormalizedLandmarkList();
         foreach (var (x, y, z) in src)
         {
-            dst.Landmark.Add(new Mp.NormalizedLandmark
-            {
-                X = x,
-                Y = y,
-                Z = z,
-            });
+            dst.Landmark.Add(new Mp.NormalizedLandmark { X = x, Y = y, Z = z });
         }
         return dst;
     }
 
-    // 리플렉션으로 float 프로퍼티/필드 읽기
     private static float SafeGetFloatProp(object obj, params string[] names)
     {
         if (obj == null) return 0f;
@@ -269,11 +294,9 @@ public class MediaPipeResultFeeder : MonoBehaviour
                 catch { }
             }
         }
-
         return 0f;
     }
 
-    // 리플렉션으로 string 프로퍼티/필드 읽기
     private static string SafeGetStringProp(object obj, params string[] names)
     {
         if (obj == null) return null;
@@ -303,7 +326,6 @@ public class MediaPipeResultFeeder : MonoBehaviour
                 catch { }
             }
         }
-
         return null;
     }
 }

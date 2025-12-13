@@ -5,7 +5,7 @@ public class PredictionRingBuffer
     private readonly LinkedList<Prediction> _buf = new();
     private readonly float _keepSec;
 
-    public PredictionRingBuffer(float keepSec = 2.0f) => _keepSec = keepSec;
+    public PredictionRingBuffer(float keepSec = 1.0f) => _keepSec = keepSec;
 
     public void Add(Prediction p) => _buf.AddLast(p);
 
