@@ -6,10 +6,12 @@
 
 # Project Information
 ### Topic : 청각에 어려움이 있는 사람들도 음악을 즐길 수 있다, 수어 학습을 돕는 모바일 리듬 게임
-#### 소개 영상   
+#### 기획 과정 영상   
 [![Video Thumbnail](https://img.youtube.com/vi/ZoLThXx7v3g/0.jpg)](https://youtu.be/ZoLThXx7v3g)
 
-[![Video Thumbnail](https://img.youtube.com/vi/IHCQXCFa4m8?si=UriUWDUXbUUSAfR30.jpg)](https://youtu.be/IHCQXCFa4m8?si=UriUWDUXbUUSAfR3)
+#### 최종 영상
+[![Video Thumbnail](https://img.youtube.com/vi/IHCQXCFa4m8/0.jpg)](https://youtu.be/IHCQXCFa4m8)
+
 #### 수어로 변환된 노래가사를 박자에 맞춰 화면에 나오는 가이드 수화를 따라합니다.      
 #### 카메라를 통해 실시간으로 동작을 평가하여 점수가 부여됩니다.    
 
