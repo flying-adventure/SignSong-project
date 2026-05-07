@@ -1148,6 +1148,64 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 695955237}
   m_CullTransparentMesh: 1
+--- !u!1 &778595376
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 778595378}
+  - component: {fileID: 778595377}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &778595377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 778595376}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66bd54253c96c3941b877298cf05c242, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  songClip: {fileID: 8300000, guid: 9f4aed06f8b4db541b93861f31ebea8f, type: 3}
+  chartFile: {fileID: 4900000, guid: 804863f90b019054ba830480627e6bef, type: 3}
+  noteArea: {fileID: 1110429379}
+  laneSpawnTops:
+  - {fileID: 99465970}
+  - {fileID: 473653453}
+  - {fileID: 1009986191}
+  laneHitLines:
+  - {fileID: 324937601}
+  - {fileID: 1786668605}
+  - {fileID: 801238306}
+  notePrefab: {fileID: 6460846050579930160, guid: 3f9d8d01f749c344f9361fe3af65edeb, type: 3}
+  globalOffset: 0
+  noteTravelTime: 5
+--- !u!4 &778595378
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 778595376}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1284.6572, y: 992.885, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &801238305
 GameObject:
   m_ObjectHideFlags: 0
@@ -3436,3 +3494,4 @@ SceneRoots:
   - {fileID: 857440875}
   - {fileID: 1699088621}
   - {fileID: 1411488470}
+  - {fileID: 778595378}
