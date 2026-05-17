@@ -12,9 +12,13 @@ public class SignNoteManager : MonoBehaviour
     public AudioSource audioSource;
 
     [Header("Judge Windows")]
-    public float perfectWindow = 0.25f;
-    public float goodWindow = 0.50f;
-    public float missWindow = 0.80f;
+    public float perfectWindow = 0.30f;
+    public float goodWindow = 0.80f;
+    public float missWindow = 1.20f;
+
+    [Header("Timing Calibration")]
+    public float noteTimeOffsetSec = 0.0f;
+    public float modelLatencySec = 0.0f;
 
     private readonly List<SignNoteData> notes = new List<SignNoteData>();
 
@@ -63,7 +67,7 @@ public class SignNoteManager : MonoBehaviour
             string keyword = cols[1].Trim();
             float lyricTimeSec = ParseFloat(cols[2]);
             int beatIndex = ParseInt(cols[3]);
-            float timeSec = ParseFloat(cols[4]);
+            float timeSec = ParseFloat(cols[4]) + noteTimeOffsetSec;
             string signId = cols[5].Trim();
             string difficulty = cols[6].Trim();
 
@@ -87,31 +91,38 @@ public class SignNoteManager : MonoBehaviour
         if (audioSource == null)
             return Time.time;
 
-        return audioSource.time;
+        return audioSource.time;   // 현재 음악 시간
+    }
+
+    public float GetJudgeTime()
+    {
+        return GetCurrentTime() - modelLatencySec;   // 판정에 사용할 보정된 시간
+        // modelLatencySec: 모델 인식(예측)이 실제 동작보다 늦게 들어오는 시간
     }
 
     public SignNoteData GetCurrentJudgeableNote()
     {
-        float currentTime = GetCurrentTime();
-
-        SignNoteData bestNote = null;
-        float bestDiff = float.MaxValue;
+        float judgeTime = GetJudgeTime();
 
         foreach (SignNoteData note in notes)
         {
             if (note.judged)
                 continue;
 
-            float diff = Mathf.Abs(currentTime - note.timeSec);
+            // 아직 판정 구간에 들어오기 전이면 더 볼 필요 없음
+            if (judgeTime < note.timeSec - missWindow)
+                return null;
 
-            if (diff <= missWindow && diff < bestDiff)
-            {
-                bestDiff = diff;
-                bestNote = note;
-            }
+            // 현재 판정 가능한 노트
+            if (judgeTime <= note.timeSec + missWindow)
+                return note;
+
+            // 이미 missWindow를 지나버린 노트도 반환
+            // SignGameBridge에서 MISS 처리할 수 있게 함
+            return note;
         }
 
-        return bestNote;
+        return null;
     }
 
     public string JudgeTiming(SignNoteData note)
@@ -119,7 +130,7 @@ public class SignNoteManager : MonoBehaviour
         if (note == null)
             return "MISS";
 
-        float diff = Mathf.Abs(GetCurrentTime() - note.timeSec);
+        float diff = Mathf.Abs(GetJudgeTime() - note.timeSec);
 
         if (diff <= perfectWindow)
             return "PERFECT";
@@ -128,6 +139,26 @@ public class SignNoteManager : MonoBehaviour
             return "GOOD";
 
         return "MISS";
+    }
+
+    // MISS 확정용 함수 추가
+    public bool ShouldMiss(SignNoteData note)
+    {
+        if (note == null)
+            return false;
+
+        float judgeTime = GetJudgeTime();
+
+        return judgeTime > note.timeSec + missWindow;
+    }
+
+    // 디버그 로그 함수 추가하기
+    public float GetTimingDiff(SignNoteData note)
+    {
+        if (note == null)
+            return 999f;
+
+        return GetJudgeTime() - note.timeSec;
     }
 
     public void MarkJudged(SignNoteData note)

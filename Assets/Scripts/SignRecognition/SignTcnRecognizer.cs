@@ -12,8 +12,9 @@ public class SignTcnRecognizer : MonoBehaviour
     public string centroidsPath = "Models/centroids.json";
 
     [Header("Thresholds")]
-    public float confidenceThreshold = 0.6f;
-    public float distanceThreshold = 10.271705627441406f;
+    public bool useMetadataThresholds = false;
+    public float confidenceThreshold = 0.80f;
+    public float distanceThreshold = 22.0f;
 
     private Unity.InferenceEngine.Model classifierModel;
     private Unity.InferenceEngine.Model embeddingModel;
@@ -63,9 +64,13 @@ public class SignTcnRecognizer : MonoBehaviour
 
         if (metadata != null)
         {
-            confidenceThreshold = metadata.confidence_threshold;
-            distanceThreshold = metadata.distance_threshold;
             classNames = metadata.class_names;
+
+            if (useMetadataThresholds)
+            {
+                confidenceThreshold = metadata.confidence_threshold;
+                distanceThreshold = metadata.distance_threshold;
+            }
         }
 
         Debug.Log("[SignTcnRecognizer] Metadata and centroids loaded.");
