@@ -24,9 +24,14 @@ public class GameManager : MonoBehaviour
     [Header("Note Travel")]
     public float noteTravelTime = 5.0f;
 
+    [Header("Guide Video")]
+    public GuideVideoPlayer guideVideoPlayer;
+    public float guideVideoLeadTime = 3.0f; // 수어 영상을 몇 초 먼저 시작할지
+
     private AudioSource audioSource;
     private List<NoteData> notes = new List<NoteData>();
     private int nextNoteIndex = 0;
+    private int nextVideoIndex = 0;
     private bool songStarted = false;
     private bool endingTriggered = false;
 
@@ -79,6 +84,7 @@ public class GameManager : MonoBehaviour
 
         songStarted = true;
         nextNoteIndex = 0;
+        nextVideoIndex = 0;
         endingTriggered = false;
     }
 
@@ -99,6 +105,36 @@ public class GameManager : MonoBehaviour
             {
                 SpawnNote(note);
                 nextNoteIndex++;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        while (nextVideoIndex < notes.Count)
+        {
+            var videoNote = notes[nextVideoIndex];
+
+            float videoStartTime = videoNote.time - guideVideoLeadTime;
+
+            if (videoStartTime <= songTime)
+            {
+                float videoDuration;
+
+                if (nextVideoIndex < notes.Count - 1)
+                    videoDuration = notes[nextVideoIndex + 1].time - videoNote.time;
+                else
+                    videoDuration = 1.5f;
+
+                videoDuration = Mathf.Clamp(videoDuration, 0.8f, 2.0f);
+
+                if (guideVideoPlayer != null)
+                {
+                    guideVideoPlayer.PlayWord(videoNote.word, videoDuration);
+                }
+
+                nextVideoIndex++;
             }
             else
             {
