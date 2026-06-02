@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class SignGameBridge : MonoBehaviour
 {
@@ -43,6 +44,17 @@ public class SignGameBridge : MonoBehaviour
     private int missCount = 0;
     private int totalJudgedCount = 0;
     private int totalScore = 0;
+
+    [Header("Result Scene")]
+    [SerializeField] private string resultSceneName = "result2";
+    [SerializeField] private AudioSource musicAudioSource;
+    [SerializeField] private bool goResultWhenMusicEnds = true;
+    [SerializeField] private float resultDelay = 1.0f;
+
+    private int currentCombo = 0;
+    private int maxCombo = 0;
+    private bool gameFinished = false;
+    private bool musicStarted = false;
 
     [Header("Timing Debug")]
     public bool enableTimingStats = true;
@@ -118,18 +130,24 @@ public class SignGameBridge : MonoBehaviour
             case "PERFECT":
                 perfectCount++;
                 totalScore += perfectScore;
+                currentCombo++;
                 break;
 
             case "GOOD":
                 goodCount++;
                 totalScore += goodScore;
+                currentCombo++;
                 break;
 
             case "MISS":
                 missCount++;
                 totalScore += missScore;
+                currentCombo = 0;
                 break;
         }
+
+        if (currentCombo > maxCombo)
+            maxCombo = currentCombo;
 
         totalJudgedCount++;
 
@@ -140,10 +158,11 @@ public class SignGameBridge : MonoBehaviour
             Debug.Log(
                 $"[JudgeCount] total={totalJudgedCount}, " +
                 $"PERFECT={perfectCount}, GOOD={goodCount}, MISS={missCount}, " +
-                $"score={totalScore}"
+                $"score={totalScore}, combo={currentCombo}, maxCombo={maxCombo}"
             );
         }
     }
+
     private void UpdateScoreUI()
     {
         if (perfectCountText != null)
@@ -306,5 +325,75 @@ public class SignGameBridge : MonoBehaviour
             AddJudgeCount("MISS");
             noteManager.MarkJudged(note);
         }
+    }
+
+    private void Update()
+    {
+        if (!goResultWhenMusicEnds || gameFinished)
+            return;
+
+        if (musicAudioSource == null)
+            return;
+
+        if (musicAudioSource.isPlaying)
+        {
+            musicStarted = true;
+        }
+
+        if (musicStarted && !musicAudioSource.isPlaying)
+        {
+            StartCoroutine(FinishGameAfterDelay());
+        }
+    }
+
+    private IEnumerator FinishGameAfterDelay()
+    {
+        gameFinished = true;
+
+        yield return new WaitForSeconds(resultDelay);
+
+        FinishGameAndGoResult();
+    }
+
+    public void FinishGameAndGoResult()
+    {
+        if (gameFinished == false)
+            gameFinished = true;
+
+        string finalGrade = CalculateGrade();
+
+        GameResultData.SetResult(
+            perfectCount,
+            goodCount,
+            missCount,
+            totalScore,
+            maxCombo,
+            finalGrade
+        );
+
+        Debug.Log(
+            $"[GameResult] PERFECT={perfectCount}, GOOD={goodCount}, MISS={missCount}, " +
+            $"score={totalScore}, maxCombo={maxCombo}, grade={finalGrade}"
+        );
+
+        SceneManager.LoadScene(resultSceneName);
+    }
+
+    private string CalculateGrade()
+    {
+        if (totalJudgedCount <= 0)
+            return "F";
+
+        int maxPossibleScore = totalJudgedCount * perfectScore;
+        float scoreRatio = (float)totalScore / maxPossibleScore;
+
+        if (scoreRatio >= 0.60f)
+            return "A";
+        else if (scoreRatio >= 0.30f)
+            return "B";
+        else if (scoreRatio >= 0.10f)
+            return "C";
+        else
+            return "F";
     }
 }

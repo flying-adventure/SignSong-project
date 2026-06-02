@@ -47,9 +47,9 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.3.10f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.SourceGenerators.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.3.10f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.3.10f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
-    <Analyzer Include="C:\Users\Nam KyungMin\SignSong_2026_ver2\SignSong-project\Library\PackageCache\com.unity.ai.inference@e760aa121ec7\Runtime\Core\SourceGenerator\SourceGenerators.dll" />
-    <Analyzer Include="C:\Users\Nam KyungMin\SignSong_2026_ver2\SignSong-project\Library\PackageCache\com.unity.dt.app-ui@8ac7e730dd5d\Runtime\SourceGenerators\netstandard2.0\EnumToLowerCase.dll" />
-    <Analyzer Include="C:\Users\Nam KyungMin\SignSong_2026_ver2\SignSong-project\Library\PackageCache\com.unity.dt.app-ui@8ac7e730dd5d\Runtime\MVVM\SourceGenerators\netstandard2.0\MVVMSourceGenerators.dll" />
+    <Analyzer Include="C:\Users\Nam KyungMin\SignSong_Clone_260602\SignSong-project\Library\PackageCache\com.unity.ai.inference@e760aa121ec7\Runtime\Core\SourceGenerator\SourceGenerators.dll" />
+    <Analyzer Include="C:\Users\Nam KyungMin\SignSong_Clone_260602\SignSong-project\Library\PackageCache\com.unity.dt.app-ui@8ac7e730dd5d\Runtime\SourceGenerators\netstandard2.0\EnumToLowerCase.dll" />
+    <Analyzer Include="C:\Users\Nam KyungMin\SignSong_Clone_260602\SignSong-project\Library\PackageCache\com.unity.dt.app-ui@8ac7e730dd5d\Runtime\MVVM\SourceGenerators\netstandard2.0\MVVMSourceGenerators.dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventHandler.cs" />
@@ -68,6 +68,7 @@
     <Compile Include="Assets\MediaPipeUnity\Tutorial\Hello World\HelloWorld.cs" />
     <Compile Include="Assets\MediaPipeUnity\Samples\External\FontAwesome\UnicodeInlineText.cs" />
     <Compile Include="Assets\MediaPipeUnity\Samples\Scenes\Legacy\Holistic\HolisticTrackingConfig.cs" />
+    <Compile Include="Assets\Scripts\notescripts\GuideVideoPlayer.cs" />
     <Compile Include="Assets\Scripts\SignRecognition\SignTcnRecognizer.cs" />
     <Compile Include="Assets\MediaPipeUnity\Samples\Common\Scripts\RunningMode.cs" />
     <Compile Include="Assets\MediaPipeUnity\Samples\Common\Scripts\ImageSource\StaticImageSource.cs" />
@@ -159,6 +160,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventCheck.cs" />
     <Compile Include="Assets\MediaPipeUnity\Samples\Common\Scripts\InferenceMode.cs" />
     <Compile Include="Assets\MediaPipeUnity\Samples\UI\Scripts\AutoFit.cs" />
+    <Compile Include="Assets\Scripts\GameResultData.cs" />
     <Compile Include="Assets\MediaPipeUnity\Samples\UI\Scripts\ImageSourceConfig.cs" />
     <Compile Include="Assets\Scripts\Auth\UserProfileUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshProFloatingText.cs" />
@@ -166,7 +168,6 @@
     <Compile Include="Assets\MediaPipeUnity\Samples\Common\Scripts\VisionTaskApiRunner.cs" />
     <Compile Include="Assets\Scripts\SignRecognition\SignPredictionProviderDummyTest.cs" />
     <Compile Include="Assets\MediaPipeUnity\Samples\Scenes\Legacy\Holistic\HolisticTrackingGraph.cs" />
-    <Compile Include="Assets\Scripts\guidevideo\GuideVideoPlayer.cs" />
     <Compile Include="Assets\MediaPipeUnity\Samples\Scenes\Hand Landmark Detection\HandLandmarkDetectionConfig.cs" />
     <Compile Include="Assets\MediaPipeUnity\Samples\Scenes\Legacy\MediaPipe Video\MediaPipeVideoSolution.cs" />
     <Compile Include="Assets\Scripts\DropdownSceneLoader.cs" />
@@ -811,6 +812,14 @@
     </Reference>
     <Reference Include="Google.MiniJson">
       <HintPath>Assets\Firebase\Plugins\Google.MiniJson.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Android.Types">
+      <HintPath>C:\Program Files\Unity\Hub\Editor\6000.3.10f1\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Types.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Android.Gradle">
+      <HintPath>C:\Program Files\Unity\Hub\Editor\6000.3.10f1\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Gradle.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="netstandard">
