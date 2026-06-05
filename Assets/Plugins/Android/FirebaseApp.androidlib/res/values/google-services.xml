@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@string/gcm_defaultSenderId,@string/google_storage_bucket,@string/project_id,@string/google_api_key,@string/google_crash_reporting_api_key,@string/google_app_id,@string/default_android_client_id,@string/default_web_client_id">
+  <string name="gcm_defaultSenderId" translatable="false">310234877349</string>
+  <string name="google_storage_bucket" translatable="false">signsong.firebasestorage.app</string>
+  <string name="project_id" translatable="false">signsong</string>
+  <string name="google_api_key" translatable="false">AIzaSyAjtZC_aGq1uctq-mTps3GZIyjlcv5uY9M</string>
+  <string name="google_crash_reporting_api_key" translatable="false">AIzaSyAjtZC_aGq1uctq-mTps3GZIyjlcv5uY9M</string>
+  <string name="google_app_id" translatable="false">1:310234877349:android:2aef5f66d06145ec34ec4c</string>
+  <string name="default_android_client_id" translatable="false">310234877349-qm8d9qh739rma0pqhhfttogs7ppjopus.apps.googleusercontent.com</string>
+  <string name="default_web_client_id" translatable="false">310234877349-hegevlvvic7ht4frlevmvd20ivtcqiok.apps.googleusercontent.com</string>
+</resources>

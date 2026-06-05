@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "310234877349",
+    "project_id": "signsong",
+    "storage_bucket": "signsong.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:310234877349:android:2aef5f66d06145ec34ec4c",
+        "android_client_info": {
+          "package_name": "com.dojang.signsong"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "310234877349-qm8d9qh739rma0pqhhfttogs7ppjopus.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dojang.signsong",
+            "certificate_hash": "dba3cd158adb4779c463083c09ede9f6bd0a961d"
+          }
+        },
+        {
+          "client_id": "310234877349-hegevlvvic7ht4frlevmvd20ivtcqiok.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjtZC_aGq1uctq-mTps3GZIyjlcv5uY9M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "310234877349-hegevlvvic7ht4frlevmvd20ivtcqiok.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -5,3 +5,55 @@ obj/
 Build/
 Builds/
 UserSettings/
+
+# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+
+# Unity memory and crash files
+sysinfo.txt
+*.stackdump
+
+# Visual Studio / Rider / VS Code generated files
+.vs/
+.idea/
+.vscode/
+*.csproj
+*.sln
+*.slnx
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+
+# Unity temporary files
+*.tmp
+*.bak
+*.swp
+*.pidb.meta
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Local temporary files
+.utmp/
+
+# Android / Gradle generated files
+.gradle/
+**/gradleOut/
+**/build/
+*.apk
+*.aab
+
+# Do not commit local keystores
+*.keystore
+*.jks

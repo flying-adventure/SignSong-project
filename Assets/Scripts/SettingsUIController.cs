@@ -9,8 +9,6 @@ public class SettingsUIController : MonoBehaviour
     public TMP_Text effectSoundText;
 
     private bool isHapticHard = true;
-    private bool isBgmOn = true;
-    private bool isEffectSoundOn = true;
 
     void Start()
     {
@@ -25,20 +23,32 @@ public class SettingsUIController : MonoBehaviour
 
     public void ToggleBGM()
     {
-        isBgmOn = !isBgmOn;
+        if (BGMManager.Instance != null)
+        {
+            BGMManager.Instance.ToggleBGM();
+        }
+
         UpdateUI();
     }
 
     public void ToggleEffectSound()
     {
-        isEffectSoundOn = !isEffectSoundOn;
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.ToggleSFX();
+        }
+
         UpdateUI();
     }
 
     private void UpdateUI()
     {
         hapticText.text = isHapticHard ? "HARD" : "WEAK";
-        bgmText.text = isBgmOn ? "ON" : "OFF";
-        effectSoundText.text = isEffectSoundOn ? "ON" : "OFF";
+
+        if (BGMManager.Instance != null)
+            bgmText.text = BGMManager.Instance.IsBgmOn() ? "ON" : "OFF";
+
+        if (SoundManager.Instance != null)
+            effectSoundText.text = SoundManager.Instance.IsSfxOn() ? "ON" : "OFF";
     }
 }
