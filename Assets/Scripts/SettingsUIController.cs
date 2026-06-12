@@ -12,12 +12,15 @@ public class SettingsUIController : MonoBehaviour
 
     void Start()
     {
+        isHapticHard = PlayerPrefs.GetInt("HapticStrength", 1) == 1;
         UpdateUI();
     }
 
     public void ToggleHaptic()
     {
         isHapticHard = !isHapticHard;
+        PlayerPrefs.SetInt("HapticStrength", isHapticHard ? 1 : 0);
+        PlayerPrefs.Save();
         UpdateUI();
     }
 

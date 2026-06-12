@@ -26,7 +26,10 @@ public class GameManager : MonoBehaviour
 
     [Header("Guide Video")]
     public GuideVideoPlayer guideVideoPlayer;
-    public float guideVideoLeadTime = 3.0f; // ¼ö¾î ¿µ»óÀ» ¸î ÃÊ ¸ÕÀú ½ÃÀÛÇÒÁö
+    public float guideVideoLeadTime = 3.0f; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+
+    [Header("Haptic Glove")]
+    public HapticScheduler hapticScheduler;
 
     private AudioSource audioSource;
     private List<NoteData> notes = new List<NoteData>();
@@ -86,6 +89,8 @@ public class GameManager : MonoBehaviour
         nextNoteIndex = 0;
         nextVideoIndex = 0;
         endingTriggered = false;
+
+        hapticScheduler?.StartSchedule(audioSource);
     }
 
     void Update()
@@ -173,13 +178,13 @@ public class GameManager : MonoBehaviour
 
         if (laneSpawnTops == null || laneSpawnTops.Length <= lane || laneSpawnTops[lane] == null)
         {
-            Debug.LogError($"[GameManager] laneSpawnTops[{lane}] ÀÌ ¼³Á¤µÇÁö ¾ÊÀ½");
+            Debug.LogError($"[GameManager] laneSpawnTops[{lane}] ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½");
             return;
         }
 
         if (laneHitLines == null || laneHitLines.Length <= lane || laneHitLines[lane] == null)
         {
-            Debug.LogError($"[GameManager] laneHitLines[{lane}] ÀÌ ¼³Á¤µÇÁö ¾ÊÀ½");
+            Debug.LogError($"[GameManager] laneHitLines[{lane}] ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½");
             return;
         }
 
@@ -191,7 +196,7 @@ public class GameManager : MonoBehaviour
         var controller = go.GetComponent<NoteController>();
         if (controller == null)
         {
-            Debug.LogError("[GameManager] NotePrefab¿¡ NoteController ¾øÀ½");
+            Debug.LogError("[GameManager] NotePrefabï¿½ï¿½ NoteController ï¿½ï¿½ï¿½ï¿½");
             return;
         }
 
