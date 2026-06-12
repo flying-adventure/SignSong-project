@@ -89,12 +89,31 @@
 - **구동**: 코인형 진동모터 (양손 분산 배치)
 - **제어**: MOSFET 스위칭 방식 (안정적 다중 모터 제어)
 - **전원**: 3.7V Li-Po 배터리 + TP4056 충전/보호 모듈
-- **진동 패턴**: 「벚꽃엔딩」 드럼 리듬 기반 (librosa 분석)
+- **통신**: Bluetooth Classic SPP → PC 가상 COM 포트로 연결
+- **진동 패턴**: 「벚꽃엔딩」 드럼 리듬 기반 (librosa 분석, `벚꽃엔딩_drum_motor_2.csv`)
+
+#### Unity ↔ ESP32 통신 구조
+```
+Unity (HapticScheduler)
+  └─ AudioSource.time 기준으로 CSV 이벤트 순차 처리
+       └─ GloveBluetoothSender → SerialPort (COM5)
+            └─ ESP32 (SignSong_Glove)
+                 ├─ GPIO 25 → MOSFET → 왼손 모터
+                 └─ GPIO 26 → MOSFET → 오른손 모터
+```
+
+#### 명령 포맷 (Unity → ESP32)
+```
+M1:{0~255},M2:{0~255},D:{ms}\n
+예) M1:0,M2:40,D:100\n   (오른손 세기 40, 100ms)
+    M1:255,M2:0,D:120\n  (왼손 세기 255, 120ms)
+```
 
 #### 특징
 - 배터리 기반 독립 동작 (사용자 움직임 제약 없음)
 - 음악의 드럼 리듬을 실시간으로 촉각 정보로 변환
 - 좌우 손에 분산된 진동으로 리듬의 강약 및 구간 변화 구분 가능
+- ESP32 미연결 시에도 Unity 콘솔에 진동 로그 출력 (시뮬레이션 모드)
 
 ---
 
@@ -127,23 +146,99 @@
 - Unity 6 (6000.3.10f1) 이상
 - Android Build Support (모바일 빌드 시)
 - 웹캠 또는 카메라 장치
+- (선택) ESP32 진동장갑 + Arduino IDE 2.x
 
 ### 실행 절차
+
+#### Unity 프로젝트 설정
 1. 저장소 클론
    ```
    git clone https://github.com/flying-adventure/SignSong-project.git
    cd SignSong-project
    ```
 2. Unity Hub에서 프로젝트 폴더 열기 (프로젝트 에디터 버전: Unity 6.0.3)
-3. `Assets/StreamingAssets/Models/` 경로 확인
+3. **API 호환성 수준 변경** (SerialPort 사용을 위해 필수)
+   ```
+   Edit → Project Settings → Player → Other Settings
+     → Api Compatibility Level → .NET Framework
+   ```
+4. `Assets/StreamingAssets/Models/` 경로 확인
    - `best_tcn.sentis` — 수어 분류 모델
    - `tcn_embedding_model.sentis` — OOD 탐지용 임베딩 모델
    - `ood_metadata.json` — 임계값 및 클래스 정보
    - `centroids.json` — 클래스별 임베딩 중심점
-4. `Assets/StreamingAssets/Charts/` 경로 확인
+5. `Assets/StreamingAssets/Charts/` 경로 확인
    - `final_cherryblossom_mapping_table_auto.csv` — 벚꽃엔딩 노트 차트
-5. Play Mode 실행 또는 Android 빌드
-6. 앱 실행 후 곡 선택 → 게임 플레이
+   - `벚꽃엔딩_drum_motor_2.csv` — 진동 타이밍 데이터
+6. `Gayo_game` 씬에서 컴포넌트 연결
+   - `GameManager` GameObject에 `HapticScheduler`, `GloveBluetoothSender` 컴포넌트 추가
+   - `GameManager` Inspector → `Haptic Scheduler` 필드에 HapticScheduler 연결
+   - `HapticScheduler`의 `Sender`는 실행 시 자동 연결 (`GetComponent` 사용)
+7. Play Mode 실행 또는 Android 빌드
+8. 앱 실행 후 곡 선택 → 게임 플레이
+
+---
+
+---
+
+## 🧤 진동장갑 설정 가이드
+
+### 하드웨어 연결
+
+```
+ESP32 Dev Module
+  ├── GPIO 25 ──→ MOSFET 게이트 ──→ 왼손 코인 진동모터 ──→ GND
+  ├── GPIO 26 ──→ MOSFET 게이트 ──→ 오른손 코인 진동모터 ──→ GND
+  ├── 3.3V / GND ──→ MOSFET 소스 공통 GND
+  └── 전원: 3.7V Li-Po + TP4056 충전/보호 모듈
+```
+
+> MOSFET: N채널 (예: 2N7000, IRLZ44N). 게이트에 GPIO 연결, 드레인에 모터(+), 소스에 GND.
+
+### ESP32 펌웨어 업로드
+
+1. Arduino IDE 2.x에서 `esp-32/SignSong_Glove/SignSong_Glove.ino` 열기
+2. **보드 설정**
+   ```
+   도구 → 보드 → ESP32 Arduino → ESP32 Dev Module
+   ```
+3. **라이브러리 확인** — `BluetoothSerial`은 ESP32 Arduino Core에 포함 (별도 설치 불필요)
+4. ESP32를 USB로 PC에 연결 후 업로드
+5. 시리얼 모니터 (115200 baud) 에서 아래 메시지 확인
+   ```
+   [SignSong] 블루투스 준비 완료 - 디바이스명: SignSong_Glove
+   ```
+
+### PC 블루투스 페어링
+
+1. `Windows 설정 → 블루투스 및 기타 디바이스 → 디바이스 추가`
+2. `SignSong_Glove` 선택 후 페어링
+3. `장치 관리자 → 포트(COM & LPT)` 에서 `SignSong_Glove`에 할당된 COM 번호 확인
+
+### Unity COM 포트 설정
+
+Unity `Gayo_game` 씬 → `GameManager` GameObject → `GloveBluetoothSender` 컴포넌트 → **Port Name** 필드에 확인한 COM 번호 입력 (기본값: `COM5`)
+
+### 진동 강도 설정
+
+게임 내 설정 화면 (`SettingsScene`) 에서 **HARD / WEAK** 토글로 조절 가능
+- **HARD**: 원본 세기 (최대 255)
+- **WEAK**: 절반 세기 (최대 127)
+
+설정값은 `PlayerPrefs`에 저장되어 재실행 시에도 유지됨
+
+### 동작 확인 (콘솔 로그)
+
+게임 플레이 중 Unity Console에 실시간 출력:
+```
+[HapticScheduler] 시작 — 이벤트 423개 로드됨
+[GloveBluetoothSender] COM5 연결 성공
+[진동]  8.45s | snare   | 왼손:  0  오른손: 40 | 100ms
+[진동]  8.94s | hihat   | 왼손: 40  오른손:  0 |  60ms
+[진동]  9.45s | snare   | 왼손:  0  오른손: 40 | 100ms
+```
+
+> ESP32 미연결 시에도 콘솔 로그는 정상 출력됨 (시뮬레이션 모드)
 
 ---
 
@@ -183,6 +278,11 @@ SignSong-project/
 │   │   │   ├── SignRecognitionResult.cs       # 인식 결과 모델
 │   │   │   ├── OodMetadata.cs                 # OOD 메타데이터 모델
 │   │   │   └── SignRecognizerTest.cs          # 테스트용 스크립트
+│   │   ├── Haptic/                            # 진동장갑 제어
+│   │   │   ├── HapticEvent.cs                 # 진동 이벤트 데이터 구조체
+│   │   │   ├── HapticCsvParser.cs             # 진동 타이밍 CSV 파서
+│   │   │   ├── GloveBluetoothSender.cs        # Bluetooth SerialPort 전송
+│   │   │   └── HapticScheduler.cs             # AudioSource 기반 진동 스케줄러
 │   │   ├── CameraFeed.cs                      # 카메라 입력 처리
 │   │   ├── UIController.cs                    # 게임 UI 제어
 │   │   ├── ResultSceneController.cs           # 결과 화면 씬 전환
@@ -190,7 +290,7 @@ SignSong-project/
 │   │   ├── DropdownSceneLoader.cs             # 카테고리 드롭다운 씬 전환
 │   │   ├── PauseController.cs                 # 일시정지 기능
 │   │   ├── LoadingController.cs               # 로딩 화면 제어
-│   │   └── SettingsUIController.cs            # 설정 UI 제어
+│   │   └── SettingsUIController.cs            # 설정 UI 제어 (Hard/Weak PlayerPrefs 저장)
 │   ├── StreamingAssets/
 │   │   ├── Models/                            # 런타임 모델 파일 (Sentis 형식)
 │   │   │   ├── best_tcn.sentis
@@ -198,10 +298,14 @@ SignSong-project/
 │   │   │   ├── ood_metadata.json              # 임계값 및 클래스 정보
 │   │   │   └── centroids.json                 # 클래스별 임베딩 중심점
 │   │   └── Charts/
-│   │       └── final_cherryblossom_mapping_table_auto.csv  # 벚꽃엔딩 노트 차트
+│   │       ├── final_cherryblossom_mapping_table_auto.csv  # 벚꽃엔딩 노트 차트
+│   │       └── 벚꽃엔딩_drum_motor_2.csv                  # 진동 타이밍 데이터
 │   └── UI/                                    # UI 이미지 리소스
 │       ├── Fonts/                             # 커스텀 폰트 (April16th, Jersey10)
 │       └── *.png                              # 각 화면별 UI 이미지
+├── esp-32/
+│   └── SignSong_Glove/
+│       └── SignSong_Glove.ino                 # ESP32 Bluetooth 진동 제어 펌웨어
 ├── Packages/
 │   └── manifest.json                          # Unity 패키지 목록
 └── ProjectSettings/                           # Unity 프로젝트 설정
